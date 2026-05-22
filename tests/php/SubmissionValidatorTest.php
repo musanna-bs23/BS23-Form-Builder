@@ -95,6 +95,81 @@ final class SubmissionValidatorTest extends WP_UnitTestCase
         $this->assertArrayNotHasKey('sales_email', $result['errors']);
     }
 
+    public function test_text_length_and_regex_validation_rules(): void
+    {
+        $schema = [
+            'version' => 1,
+            'fields' => [
+                [
+                    'id' => 'field_1',
+                    'type' => 'text',
+                    'label' => 'Code',
+                    'name' => 'code',
+                    'settings' => [
+                        'validation' => [
+                            'minLength' => '3',
+                            'maxLength' => '5',
+                            'pattern' => '^[A-Z]+$',
+                            'patternMessage' => 'Uppercase only.',
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        $short = (new SubmissionValidator())->validate($schema, ['code' => 'AB']);
+        $pattern = (new SubmissionValidator())->validate($schema, ['code' => 'abc']);
+
+        $this->assertFalse($short['valid']);
+        $this->assertStringContainsString('at least 3 characters', $short['errors']['code']);
+        $this->assertFalse($pattern['valid']);
+        $this->assertSame('Uppercase only.', $pattern['errors']['code']);
+    }
+
+    public function test_numeric_min_and_max_validation_rules(): void
+    {
+        $schema = [
+            'version' => 1,
+            'fields' => [
+                [
+                    'id' => 'field_1',
+                    'type' => 'number',
+                    'label' => 'Age',
+                    'name' => 'age',
+                    'settings' => ['validation' => ['minValue' => '18', 'maxValue' => '65']],
+                ],
+            ],
+        ];
+
+        $result = (new SubmissionValidator())->validate($schema, ['age' => '17']);
+
+        $this->assertFalse($result['valid']);
+        $this->assertStringContainsString('at least 18', $result['errors']['age']);
+    }
+
+    public function test_file_extension_and_size_validation_rules(): void
+    {
+        $schema = [
+            'version' => 1,
+            'fields' => [
+                [
+                    'id' => 'field_1',
+                    'type' => 'file_upload',
+                    'label' => 'Resume',
+                    'name' => 'resume',
+                    'settings' => ['validation' => ['allowedExtensions' => 'pdf,docx', 'maxFileSizeMb' => '1']],
+                ],
+            ],
+        ];
+
+        $result = (new SubmissionValidator())->validate($schema, [
+            'resume' => ['name' => 'resume.exe', 'size' => 2 * 1024 * 1024],
+        ]);
+
+        $this->assertFalse($result['valid']);
+        $this->assertStringContainsString('allowed file type', $result['errors']['resume']);
+    }
+
     private function schema(): array
     {
         return [
