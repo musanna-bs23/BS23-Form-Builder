@@ -294,6 +294,7 @@ final class SchemaValidatorTest extends WP_UnitTestCase
                             'patternMessage' => '<b>Uppercase only</b>',
                             'maxFileSizeMb' => '5',
                             'allowedExtensions' => ' JPG, png, .PDF, bad<script> ',
+                            'rules' => 'required|string|min:3|regex:/^[A-Z]+$/|custom_validation:team_code<script>',
                             'unsafe' => ['skip'],
                         ],
                     ],
@@ -311,6 +312,7 @@ final class SchemaValidatorTest extends WP_UnitTestCase
                 'patternMessage' => 'Uppercase only',
                 'maxFileSizeMb' => '5',
                 'allowedExtensions' => 'jpg,png,pdf,badscript',
+                'rules' => 'required|string|min:3|regex:/^[A-Z]+$/|custom_validation:team_code',
             ],
             $result['fields'][0]['settings']['validation']
         );

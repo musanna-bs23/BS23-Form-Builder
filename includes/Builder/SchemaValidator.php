@@ -190,6 +190,13 @@ final class SchemaValidator
             }
         }
 
+        if (isset($validation['rules']) && is_scalar($validation['rules'])) {
+            $rules = trim(sanitize_text_field((string) $validation['rules']));
+            if ($rules !== '') {
+                $sanitized['rules'] = $rules;
+            }
+        }
+
         return $sanitized;
     }
 
