@@ -47,5 +47,16 @@ final class Shortcode
             [],
             BS23_FORM_BUILDER_VERSION
         );
+
+        $assetFile = BS23_FORM_BUILDER_DIR . 'assets/frontend/build/index.asset.php';
+        $asset = file_exists($assetFile) ? require $assetFile : ['dependencies' => [], 'version' => BS23_FORM_BUILDER_VERSION];
+
+        wp_enqueue_script(
+            'bs23-form-builder-frontend',
+            BS23_FORM_BUILDER_URL . 'assets/frontend/build/index.js',
+            $asset['dependencies'] ?? [],
+            $asset['version'] ?? BS23_FORM_BUILDER_VERSION,
+            true
+        );
     }
 }

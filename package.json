@@ -4,9 +4,10 @@
   "private": true,
   "license": "GPL-2.0-or-later",
   "scripts": {
-    "build": "npm run build:admin && npm run build:entries",
+    "build": "npm run build:admin && npm run build:entries && npm run build:frontend",
     "build:admin": "wp-scripts build assets/admin/src/index.js --output-path=assets/admin/build",
     "build:entries": "wp-scripts build assets/entries/src/index.js --output-path=assets/entries/build",
+    "build:frontend": "wp-scripts build assets/frontend/src/index.js --output-path=assets/frontend/build",
     "start": "wp-scripts start assets/admin/src/index.js --output-path=assets/admin/build",
     "test:js": "wp-scripts test-unit-js --env=jsdom",
     "test": "npm run test:js && composer test"
