@@ -170,6 +170,27 @@ final class SubmissionValidatorTest extends WP_UnitTestCase
         $this->assertStringContainsString('allowed file type', $result['errors']['resume']);
     }
 
+    public function test_custom_validation_rule_string_is_enforced(): void
+    {
+        $schema = [
+            'version' => 1,
+            'fields' => [
+                [
+                    'id' => 'field_1',
+                    'type' => 'text',
+                    'label' => 'Username',
+                    'name' => 'username',
+                    'settings' => ['validation' => ['rules' => 'required|string|min:3|max:20|alpha_dash']],
+                ],
+            ],
+        ];
+
+        $result = (new SubmissionValidator())->validate($schema, ['username' => 'ab']);
+
+        $this->assertFalse($result['valid']);
+        $this->assertStringContainsString('at least 3', $result['errors']['username']);
+    }
+
     private function schema(): array
     {
         return [

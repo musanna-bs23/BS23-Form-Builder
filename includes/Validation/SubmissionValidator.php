@@ -13,10 +13,12 @@ final class SubmissionValidator
     ];
 
     private Evaluator $conditionalLogic;
+    private RuleValidator $rules;
 
-    public function __construct(?Evaluator $conditionalLogic = null)
+    public function __construct(?Evaluator $conditionalLogic = null, ?RuleValidator $rules = null)
     {
         $this->conditionalLogic = $conditionalLogic ?: new Evaluator();
+        $this->rules = $rules ?: new RuleValidator();
     }
 
     public function validate(array $schema, array $input): array
@@ -62,6 +64,15 @@ final class SubmissionValidator
             if ($advancedError !== '') {
                 $errors[$name] = $advancedError;
                 continue;
+            }
+
+            $ruleString = (string) ($field['settings']['validation']['rules'] ?? '');
+            if ($ruleString !== '') {
+                $ruleError = $this->rules->validate((string) ($field['label'] ?? $name), $name, $value, $input, $ruleString);
+                if ($ruleError !== '') {
+                    $errors[$name] = $ruleError;
+                    continue;
+                }
             }
 
             $data[$name] = $value;
