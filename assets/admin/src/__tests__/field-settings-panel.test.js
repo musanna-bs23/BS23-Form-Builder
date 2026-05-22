@@ -136,6 +136,29 @@ test('field settings panel updates text validation settings', () => {
   });
 });
 
+test('field settings panel updates custom validation rules', () => {
+  const onUpdateSettings = jest.fn();
+  render(
+    <FieldSettingsPanel
+      field={{ id: 'field_text', type: 'text', label: 'Username', name: 'username', settings: { validation: { rules: 'required|string' } } }}
+      fields={[]}
+      onUpdate={() => {}}
+      onUpdateSettings={onUpdateSettings}
+      onDelete={() => {}}
+      onDuplicate={() => {}}
+      onMove={() => {}}
+    />
+  );
+
+  fireEvent.change(screen.getByLabelText('Custom validation rules'), {
+    target: { value: 'required|string|min:3|max:30|alpha_dash' },
+  });
+
+  expect(onUpdateSettings).toHaveBeenCalledWith('field_text', {
+    validation: { rules: 'required|string|min:3|max:30|alpha_dash' },
+  });
+});
+
 test('field settings panel shows numeric and upload validation controls by type', () => {
   const { rerender } = render(
     <FieldSettingsPanel

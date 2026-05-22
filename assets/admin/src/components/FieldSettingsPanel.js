@@ -147,6 +147,14 @@ export default function FieldSettingsPanel({ field, fields = [], onUpdate, onUpd
               </label>
             </>
           )}
+          <label>Custom validation rules
+            <textarea
+              placeholder="required|string|min:3|max:50"
+              rows="3"
+              value={validation.rules || ''}
+              onChange={(event) => setValidation('rules', event.target.value)}
+            />
+          </label>
         </section>
       )}
 
