@@ -29,7 +29,8 @@ final class Renderer
 
         ob_start();
         ?>
-        <form class="bs23-form" method="post">
+        <form class="bs23-form" method="post" data-bs23-form-id="<?php echo esc_attr((string) $formId); ?>">
+            <script type="application/json" class="bs23-form__schema"><?php echo wp_json_encode($schema, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?></script>
             <?php wp_nonce_field($this->submissions->nonceAction($formId)); ?>
             <input type="hidden" name="bs23_form_id" value="<?php echo esc_attr((string) $formId); ?>" />
             <input type="hidden" name="<?php echo esc_attr(SubmissionHandler::ACTION_FIELD); ?>" value="1" />
@@ -63,37 +64,33 @@ final class Renderer
     {
         $type = (string) ($field['type'] ?? '');
 
-        if (! $this->conditionalLogic->isVisible($field, $this->conditionalValues($state))) {
-            return '';
-        }
-
         if ($type === 'container') {
             return $this->containerMarkup($field, $state);
         }
 
         if ($type === 'section_break') {
-            return sprintf(
+            return $this->wrapField($field, sprintf(
                 '<hr class="bs23-form__section" /><h3 class="bs23-form__section-title">%s</h3>%s',
                 esc_html((string) ($field['label'] ?? '')),
                 ! empty($field['settings']['description']) ? '<p class="bs23-form__section-description">' . esc_html((string) $field['settings']['description']) . '</p>' : ''
-            );
+            ), $state, ['bs23-form__field--section']);
         }
 
         if ($type === 'html') {
-            return '<div class="bs23-form__html">' . wp_kses_post((string) ($field['settings']['content'] ?? $field['label'] ?? '')) . '</div>';
+            return $this->wrapField($field, '<div class="bs23-form__html">' . wp_kses_post((string) ($field['settings']['content'] ?? $field['label'] ?? '')) . '</div>', $state, ['bs23-form__field--html']);
         }
 
         if ($type === 'submit') {
             $this->hasSubmit = true;
 
-            return sprintf(
+            return $this->wrapField($field, sprintf(
                 '<button class="bs23-form__submit" type="submit">%s</button>',
                 esc_html((string) ($field['label'] ?? __('Submit', 'bs23-form-builder')))
-            );
+            ), $state, ['bs23-form__field--submit']);
         }
 
         if ($type === 'hidden') {
-            return $this->inputMarkup($field, $state, 'hidden');
+            return $this->wrapField($field, $this->inputMarkup($field, $state, 'hidden'), $state, ['bs23-form__field', 'bs23-form__field--hidden']);
         }
 
         $supported = ['name', 'email', 'text', 'textarea', 'number', 'dropdown', 'radio', 'checkbox', 'multiple_choice', 'url', 'phone'];
@@ -113,12 +110,14 @@ final class Renderer
             'bs23-form__field--' . sanitize_html_class($type),
         ], $customClasses);
 
-        return '<div class="' . esc_attr(implode(' ', $classes)) . '">' .
+        return $this->wrapField($field,
             $this->labelMarkup($field) .
             $this->controlMarkup($field, $state) .
             $this->helpMarkup($field) .
-            ($error ? '<div class="bs23-form__error">' . esc_html((string) $error) . '</div>' : '') .
-            '</div>';
+            ($error ? '<div class="bs23-form__error">' . esc_html((string) $error) . '</div>' : ''),
+            $state,
+            $classes
+        );
     }
 
     private function containerMarkup(array $field, array $state): string
@@ -305,5 +304,19 @@ final class Renderer
         $help = (string) ($field['settings']['help'] ?? '');
 
         return $help !== '' ? '<p class="bs23-form__help">' . esc_html($help) . '</p>' : '';
+    }
+
+    private function wrapField(array $field, string $content, array $state, array $classes): string
+    {
+        $visible = $this->conditionalLogic->isVisible($field, $this->conditionalValues($state));
+        $classes[] = $visible ? '' : 'is-hidden';
+
+        return sprintf(
+            '<div class="%s" data-bs23-field-id="%s" %s>%s</div>',
+            esc_attr(implode(' ', array_filter($classes))),
+            esc_attr((string) ($field['id'] ?? '')),
+            $visible ? '' : 'hidden',
+            $content
+        );
     }
 }

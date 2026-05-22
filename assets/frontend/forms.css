@@ -27,6 +27,11 @@
   gap: 8px;
 }
 
+.bs23-form__field[hidden],
+.bs23-form__field.is-hidden {
+  display: none;
+}
+
 .bs23-form input:not([type="checkbox"]):not([type="radio"]),
 .bs23-form textarea,
 .bs23-form select {
@@ -45,6 +50,14 @@
 
 .bs23-form__error {
   color: #b42318;
+  font-size: 13px;
+}
+
+.bs23-form__field.has-error input,
+.bs23-form__field.has-error select,
+.bs23-form__field.has-error textarea {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
 }
 
 .bs23-form__success {

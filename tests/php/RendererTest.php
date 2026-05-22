@@ -74,8 +74,9 @@ final class RendererTest extends WP_UnitTestCase
             ],
         ]);
 
-        $this->assertStringNotContainsString('sales_email', $html);
-        $this->assertStringNotContainsString('Sales Email', $html);
+        $this->assertStringContainsString('data-bs23-field-id="field_2"', $html);
+        $this->assertStringContainsString('class="bs23-form__schema"', $html);
+        $this->assertStringContainsString('sales_email', $html);
     }
 
     private function renderer(): Renderer
