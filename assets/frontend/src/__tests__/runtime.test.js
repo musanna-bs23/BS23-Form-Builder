@@ -35,6 +35,18 @@ test('validates required email and length rules', () => {
   expect(validateField(field, 'person@example.com')).toBe('');
 });
 
+test('validates confirmed rule against field name confirmation', () => {
+  const field = {
+    label: 'Password',
+    name: 'password',
+    type: 'text',
+    settings: { validation: { rules: 'confirmed' } },
+  };
+
+  expect(validateField(field, 'secret', { password_confirmation: 'other' })).toBe('Password must match confirmation.');
+  expect(validateField(field, 'secret', { password_confirmation: 'secret' })).toBe('');
+});
+
 test('runtime hides conditional field and disables controls', () => {
   document.body.innerHTML = `
     <form class="bs23-form" data-bs23-form-id="12">

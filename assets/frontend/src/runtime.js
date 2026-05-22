@@ -63,7 +63,7 @@ export function validateField(field, value, values = {}) {
   ].filter(Boolean).join('|');
 
   for (const rule of parseRules(rules)) {
-    const error = validateRule(label, value, values, rule.name, rule.params, validation);
+    const error = validateRule(label, field.name || '', value, values, rule.name, rule.params, validation);
     if (error) {
       return error;
     }
@@ -127,7 +127,7 @@ function conditionMatches(rule, values) {
   return actual === expected;
 }
 
-function validateRule(label, value, values, rule, params, validation) {
+function validateRule(label, name, value, values, rule, params, validation) {
   const stringValue = normalize(value);
   const empty = stringValue === '';
 
@@ -182,7 +182,7 @@ function validateRule(label, value, values, rule, params, validation) {
   if (rule === 'ends_with' && !params.some((suffix) => stringValue.endsWith(suffix))) {
     return `${label} ending is invalid.`;
   }
-  if (rule === 'confirmed' && stringValue !== normalize(values[`${fieldNameFromLabel(label)}_confirmation`] ?? '')) {
+  if (rule === 'confirmed' && stringValue !== normalize(values[`${name}_confirmation`] ?? '')) {
     return `${label} must match confirmation.`;
   }
   return '';
@@ -262,8 +262,4 @@ function cssEscape(value) {
     return window.CSS.escape(value);
   }
   return String(value).replace(/"/g, '\\"');
-}
-
-function fieldNameFromLabel(label) {
-  return label.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
 }
