@@ -30,6 +30,10 @@ require_once BS23_FORM_BUILDER_DIR . 'includes/Submission/EntryRepository.php';
 require_once BS23_FORM_BUILDER_DIR . 'includes/Submission/SubmissionHandler.php';
 require_once BS23_FORM_BUILDER_DIR . 'includes/Frontend/Renderer.php';
 require_once BS23_FORM_BUILDER_DIR . 'includes/Frontend/Shortcode.php';
+require_once BS23_FORM_BUILDER_DIR . 'includes/Entries/EntryQueryRepository.php';
+require_once BS23_FORM_BUILDER_DIR . 'includes/Export/CsvExporter.php';
+require_once BS23_FORM_BUILDER_DIR . 'includes/Rest/EntriesRestController.php';
+require_once BS23_FORM_BUILDER_DIR . 'includes/Admin/EntriesPage.php';
 
 register_activation_hook(__FILE__, [BS23\FormBuilder\Install\Installer::class, 'activate']);
 
