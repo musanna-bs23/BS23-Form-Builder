@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 $_tests_dir = getenv('WP_TESTS_DIR') ?: '/tmp/wordpress-tests-lib';
 
+require_once dirname(__DIR__) . '/vendor/autoload.php';
+
 if (! file_exists($_tests_dir . '/includes/functions.php')) {
     fwrite(STDERR, "WordPress test suite not found. Set WP_TESTS_DIR.\n");
     exit(1);
