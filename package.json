@@ -1,0 +1,22 @@
+{
+  "name": "bs23-form-builder",
+  "version": "0.1.0",
+  "private": true,
+  "license": "GPL-2.0-or-later",
+  "scripts": {
+    "build": "wp-scripts build assets/admin/src/index.js --output-path=assets/admin/build",
+    "start": "wp-scripts start assets/admin/src/index.js --output-path=assets/admin/build",
+    "test:js": "wp-scripts test-unit-js --env=jsdom",
+    "test": "npm run test:js && composer test"
+  },
+  "devDependencies": {
+    "@testing-library/react": "^15.0.0",
+    "@wordpress/scripts": "^30.0.0"
+  },
+  "dependencies": {
+    "@wordpress/api-fetch": "^7.0.0",
+    "@wordpress/components": "^29.0.0",
+    "@wordpress/element": "^6.0.0",
+    "@wordpress/icons": "^10.0.0"
+  }
+}

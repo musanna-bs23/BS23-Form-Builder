@@ -1,0 +1,23 @@
+{
+  "name": "bs23/form-builder",
+  "description": "BS23 Form Builder WordPress plugin.",
+  "type": "wordpress-plugin",
+  "license": "GPL-2.0-or-later",
+  "autoload": {
+    "psr-4": {
+      "BS23\\FormBuilder\\": "includes/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "BS23\\FormBuilder\\Tests\\": "tests/php/"
+    }
+  },
+  "require": {},
+  "require-dev": {
+    "phpunit/phpunit": "^9.6"
+  },
+  "scripts": {
+    "test": "phpunit"
+  }
+}
