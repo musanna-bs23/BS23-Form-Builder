@@ -119,6 +119,11 @@
   background: #ffffff;
 }
 
+.bs23-field-card.is-selected {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.14);
+}
+
 .bs23-field-card__label {
   color: #111827;
 }
@@ -212,6 +217,60 @@
   grid-template-columns: auto 1fr;
   align-items: center;
   justify-content: start;
+}
+
+.bs23-field-settings {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid #d7dde8;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.bs23-field-settings header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.bs23-field-settings h2 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.bs23-field-settings header span {
+  color: #64748b;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.bs23-field-settings label {
+  display: grid;
+  gap: 6px;
+  color: #475569;
+  font-weight: 600;
+}
+
+.bs23-field-settings input:not([type="checkbox"]),
+.bs23-field-settings textarea {
+  width: 100%;
+}
+
+.bs23-field-settings__toggle {
+  grid-template-columns: auto 1fr;
+  align-items: center;
+}
+
+.bs23-field-settings footer {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.bs23-field-settings .is-danger {
+  border-color: #dc2626;
+  color: #b42318;
 }
 
 @media (max-width: 960px) {

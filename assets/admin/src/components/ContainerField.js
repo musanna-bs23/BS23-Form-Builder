@@ -4,7 +4,7 @@ function getDraggedType(event) {
   return event.dataTransfer.getData('text/plain') || event.dataTransfer.getData('text');
 }
 
-export default function ContainerField({ field, onDropField }) {
+export default function ContainerField({ field, onDropField, selectedFieldId, onSelectField }) {
   return (
     <section className="bs23-container-field" aria-label={`${field.columns} column container`}>
       <div
@@ -28,9 +28,20 @@ export default function ContainerField({ field, onDropField }) {
             ) : (
               column.map((child) => (
                 child.type === 'container' ? (
-                  <ContainerField field={child} key={child.id} onDropField={onDropField} />
+                  <ContainerField
+                    field={child}
+                    key={child.id}
+                    onDropField={onDropField}
+                    onSelectField={onSelectField}
+                    selectedFieldId={selectedFieldId}
+                  />
                 ) : (
-                  <FieldCard field={child} key={child.id} />
+                  <FieldCard
+                    field={child}
+                    key={child.id}
+                    onSelect={onSelectField}
+                    selected={selectedFieldId === child.id}
+                  />
                 )
               ))
             )}

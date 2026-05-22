@@ -5,7 +5,7 @@ function getDraggedType(event) {
   return event.dataTransfer.getData('text/plain') || event.dataTransfer.getData('text');
 }
 
-export default function Canvas({ fields, onDropRoot, onDropContainer }) {
+export default function Canvas({ fields, onDropRoot, onDropContainer, selectedFieldId, onSelectField }) {
   return (
     <section
       aria-label="Form canvas"
@@ -22,9 +22,20 @@ export default function Canvas({ fields, onDropRoot, onDropContainer }) {
         <div className="bs23-builder__field-list">
           {fields.map((field) => (
             field.type === 'container' ? (
-              <ContainerField field={field} key={field.id} onDropField={onDropContainer} />
+              <ContainerField
+                field={field}
+                key={field.id}
+                onDropField={onDropContainer}
+                onSelectField={onSelectField}
+                selectedFieldId={selectedFieldId}
+              />
             ) : (
-              <FieldCard field={field} key={field.id} />
+              <FieldCard
+                field={field}
+                key={field.id}
+                onSelect={onSelectField}
+                selected={selectedFieldId === field.id}
+              />
             )
           ))}
         </div>

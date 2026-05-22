@@ -62,8 +62,9 @@ final class Renderer
 
         if ($type === 'section_break') {
             return sprintf(
-                '<hr class="bs23-form__section" /><h3 class="bs23-form__section-title">%s</h3>',
-                esc_html((string) ($field['label'] ?? ''))
+                '<hr class="bs23-form__section" /><h3 class="bs23-form__section-title">%s</h3>%s',
+                esc_html((string) ($field['label'] ?? '')),
+                ! empty($field['settings']['description']) ? '<p class="bs23-form__section-description">' . esc_html((string) $field['settings']['description']) . '</p>' : ''
             );
         }
 
@@ -92,9 +93,19 @@ final class Renderer
         $name = $this->fieldName($field);
         $error = $state['errors'][$name] ?? '';
 
-        return '<div class="bs23-form__field bs23-form__field--' . esc_attr($type) . '">' .
+        $customClasses = array_filter(array_map(
+            'sanitize_html_class',
+            preg_split('/\s+/', (string) ($field['settings']['className'] ?? '')) ?: []
+        ));
+        $classes = array_merge([
+            'bs23-form__field',
+            'bs23-form__field--' . sanitize_html_class($type),
+        ], $customClasses);
+
+        return '<div class="' . esc_attr(implode(' ', $classes)) . '">' .
             $this->labelMarkup($field) .
             $this->controlMarkup($field, $state) .
+            $this->helpMarkup($field) .
             ($error ? '<div class="bs23-form__error">' . esc_html((string) $error) . '</div>' : '') .
             '</div>';
     }
@@ -123,7 +134,7 @@ final class Renderer
             return sprintf(
                 '<textarea name="%s" %s>%s</textarea>',
                 esc_attr($this->fieldName($field)),
-                $this->requiredAttr($field),
+                trim($this->requiredAttr($field) . ' ' . $this->placeholderAttr($field)),
                 esc_textarea($this->value($field, $state))
             );
         }
@@ -144,7 +155,7 @@ final class Renderer
             esc_attr($inputType),
             esc_attr($this->fieldName($field)),
             esc_attr($this->value($field, $state)),
-            $inputType === 'hidden' ? '' : $this->requiredAttr($field)
+            $inputType === 'hidden' ? '' : trim($this->requiredAttr($field) . ' ' . $this->placeholderAttr($field))
         );
     }
 
@@ -235,5 +246,19 @@ final class Renderer
     private function requiredAttr(array $field): string
     {
         return ! empty($field['required']) ? 'required' : '';
+    }
+
+    private function placeholderAttr(array $field): string
+    {
+        $placeholder = (string) ($field['settings']['placeholder'] ?? '');
+
+        return $placeholder !== '' ? 'placeholder="' . esc_attr($placeholder) . '"' : '';
+    }
+
+    private function helpMarkup(array $field): string
+    {
+        $help = (string) ($field['settings']['help'] ?? '');
+
+        return $help !== '' ? '<p class="bs23-form__help">' . esc_html($help) . '</p>' : '';
     }
 }

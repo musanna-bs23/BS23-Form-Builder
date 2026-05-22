@@ -5,7 +5,17 @@ import Canvas from './components/Canvas';
 import Palette from './components/Palette';
 import SaveBar from './components/SaveBar';
 import SettingsPanel from './components/SettingsPanel';
-import { addFieldToContainer, addFieldToRoot } from './schema';
+import FieldSettingsPanel from './components/FieldSettingsPanel';
+import {
+  addFieldToContainer,
+  addFieldToRoot,
+  deleteField,
+  duplicateField,
+  findField,
+  moveField,
+  updateField,
+  updateFieldSettings,
+} from './schema';
 import { defaultSettings, loadSettings, saveSettings, sendTestEmail } from './settings-api';
 
 export default function App() {
@@ -13,6 +23,7 @@ export default function App() {
   const [schema, setSchema] = useState({ version: 1, fields: [] });
   const [formId, setFormId] = useState(null);
   const [status, setStatus] = useState('');
+  const [selectedFieldId, setSelectedFieldId] = useState(null);
   const [settings, setSettings] = useState(defaultSettings());
   const [settingsStatus, setSettingsStatus] = useState('');
 
@@ -24,8 +35,14 @@ export default function App() {
     if (!type) {
       return;
     }
-    setSchema((currentSchema) => addFieldToRoot(currentSchema, type));
+    setSchema((currentSchema) => {
+      const next = addFieldToRoot(currentSchema, type);
+      setSelectedFieldId(next.fields[next.fields.length - 1]?.id || null);
+      return next;
+    });
   };
+
+  const selectedField = selectedFieldId ? findField(schema, selectedFieldId) : null;
 
   const handleContainerDrop = (containerId, columnIndex, type) => {
     if (!type) {
@@ -93,8 +110,21 @@ export default function App() {
           fields={schema.fields}
           onDropContainer={handleContainerDrop}
           onDropRoot={handleRootDrop}
+          onSelectField={setSelectedFieldId}
+          selectedFieldId={selectedFieldId}
         />
         <div className="bs23-builder__side">
+          <FieldSettingsPanel
+            field={selectedField}
+            onDelete={(fieldId) => {
+              setSchema((currentSchema) => deleteField(currentSchema, fieldId));
+              setSelectedFieldId(null);
+            }}
+            onDuplicate={(fieldId) => setSchema((currentSchema) => duplicateField(currentSchema, fieldId))}
+            onMove={(fieldId, direction) => setSchema((currentSchema) => moveField(currentSchema, fieldId, direction))}
+            onUpdate={(fieldId, updates) => setSchema((currentSchema) => updateField(currentSchema, fieldId, updates))}
+            onUpdateSettings={(fieldId, updates) => setSchema((currentSchema) => updateFieldSettings(currentSchema, fieldId, updates))}
+          />
           <Palette />
           <SettingsPanel
             formId={formId}
