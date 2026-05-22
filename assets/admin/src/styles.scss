@@ -1,0 +1,37 @@
+.bs23-builder {
+  margin: 0 0 0 -20px;
+  min-height: calc(100vh - 32px);
+  background: #f6f7fb;
+  color: #111827;
+}
+
+.bs23-builder__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: #ffffff;
+  border-bottom: 1px solid #d7dde8;
+}
+
+.bs23-builder__title {
+  flex: 1;
+  max-width: 520px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.bs23-builder__workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 390px;
+  gap: 18px;
+  padding: 18px;
+}
+
+.bs23-builder__canvas,
+.bs23-builder__palette {
+  min-height: 640px;
+  background: #ffffff;
+  border: 1px solid #d7dde8;
+  border-radius: 8px;
+}

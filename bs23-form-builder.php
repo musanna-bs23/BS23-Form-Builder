@@ -23,6 +23,7 @@ require_once BS23_FORM_BUILDER_DIR . 'includes/Plugin.php';
 require_once BS23_FORM_BUILDER_DIR . 'includes/PostTypes/FormPostType.php';
 require_once BS23_FORM_BUILDER_DIR . 'includes/Builder/SchemaValidator.php';
 require_once BS23_FORM_BUILDER_DIR . 'includes/Rest/FormRestController.php';
+require_once BS23_FORM_BUILDER_DIR . 'includes/Admin/Menu.php';
 
 add_action('plugins_loaded', static function (): void {
     (new BS23\FormBuilder\Plugin())->register();

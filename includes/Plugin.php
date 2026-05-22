@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace BS23\FormBuilder;
 
+use BS23\FormBuilder\Admin\Menu;
 use BS23\FormBuilder\Builder\SchemaValidator;
 use BS23\FormBuilder\PostTypes\FormPostType;
 use BS23\FormBuilder\Rest\FormRestController;
@@ -13,5 +14,6 @@ final class Plugin
     {
         (new FormPostType())->register();
         (new FormRestController(new SchemaValidator()))->register();
+        (new Menu())->register();
     }
 }
