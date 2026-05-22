@@ -58,6 +58,25 @@ final class FormRestControllerTest extends WP_UnitTestCase
         $this->assertSame('email', get_post_meta($data['id'], '_bs23_form_schema', true)['fields'][0]['type']);
     }
 
+    public function test_create_rejects_array_title(): void
+    {
+        wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
+        do_action('init');
+        do_action('rest_api_init');
+
+        $request = new WP_REST_Request('POST', '/bs23-form-builder/v1/forms');
+        $request->set_body_params([
+            'title' => ['Contact Form'],
+            'schema' => ['version' => 1, 'fields' => []],
+        ]);
+
+        $response = rest_do_request($request);
+        $data = $response->get_data();
+
+        $this->assertSame(400, $response->get_status());
+        $this->assertSame('bs23_invalid_title', $data['code']);
+    }
+
     public function test_invalid_schema_returns_bad_request(): void
     {
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
@@ -134,6 +153,31 @@ final class FormRestControllerTest extends WP_UnitTestCase
         $this->assertSame($formId, $data['id']);
         $this->assertSame('Updated Contact Form', get_the_title($formId));
         $this->assertSame('text', get_post_meta($formId, '_bs23_form_schema', true)['fields'][0]['type']);
+    }
+
+    public function test_put_rejects_array_title_and_preserves_existing_title(): void
+    {
+        wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
+        do_action('init');
+        do_action('rest_api_init');
+
+        $formId = $this->createFormPost('Contact Form', [
+            'version' => 1,
+            'fields' => [],
+        ]);
+
+        $request = new WP_REST_Request('PUT', sprintf('/bs23-form-builder/v1/forms/%d', $formId));
+        $request->set_body_params([
+            'title' => ['Updated Contact Form'],
+            'schema' => ['version' => 1, 'fields' => []],
+        ]);
+
+        $response = rest_do_request($request);
+        $data = $response->get_data();
+
+        $this->assertSame(400, $response->get_status());
+        $this->assertSame('bs23_invalid_title', $data['code']);
+        $this->assertSame('Contact Form', get_the_title($formId));
     }
 
     public function test_get_for_non_form_id_returns_not_found(): void

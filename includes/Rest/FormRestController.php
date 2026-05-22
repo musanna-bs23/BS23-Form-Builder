@@ -61,6 +61,12 @@ final class FormRestController
      */
     public function createForm(WP_REST_Request $request)
     {
+        $title = $this->sanitizeTitle($request->get_param('title'), 'Untitled Form');
+
+        if (is_wp_error($title)) {
+            return $title;
+        }
+
         $schema = $this->sanitizeSchema($request->get_param('schema'));
 
         if (is_wp_error($schema)) {
@@ -68,7 +74,7 @@ final class FormRestController
         }
 
         $formId = wp_insert_post([
-            'post_title' => sanitize_text_field((string) $request->get_param('title')),
+            'post_title' => $title,
             'post_type' => FormPostType::NAME,
             'post_status' => 'publish',
         ], true);
@@ -111,6 +117,12 @@ final class FormRestController
             return $form;
         }
 
+        $title = $this->sanitizeTitle($request->get_param('title'), $form->post_title ?: 'Untitled Form');
+
+        if (is_wp_error($title)) {
+            return $title;
+        }
+
         $schema = $this->sanitizeSchema($request->get_param('schema'));
 
         if (is_wp_error($schema)) {
@@ -119,7 +131,7 @@ final class FormRestController
 
         $result = wp_update_post([
             'ID' => (int) $form->ID,
-            'post_title' => sanitize_text_field((string) $request->get_param('title')),
+            'post_title' => $title,
         ], true);
 
         if (is_wp_error($result)) {
@@ -159,6 +171,30 @@ final class FormRestController
                 ['status' => 400]
             );
         }
+    }
+
+    /**
+     * @param mixed $title
+     *
+     * @return string|WP_Error
+     */
+    private function sanitizeTitle($title, string $fallback)
+    {
+        if (is_array($title) || is_object($title)) {
+            return new WP_Error(
+                'bs23_invalid_title',
+                __('Form title must be a string.', 'bs23-form-builder'),
+                ['status' => 400]
+            );
+        }
+
+        $sanitizedTitle = sanitize_text_field(is_scalar($title) ? (string) $title : '');
+
+        if ($sanitizedTitle === '') {
+            return $fallback;
+        }
+
+        return $sanitizedTitle;
     }
 
     /**
