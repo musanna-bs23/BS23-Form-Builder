@@ -42,3 +42,71 @@ test('field settings panel calls duplicate delete and move actions', () => {
   expect(onDelete).toHaveBeenCalledWith('field_1');
   expect(onMove).toHaveBeenCalledWith('field_1', 'up');
 });
+
+test('field settings panel enables and edits conditional logic', () => {
+  const onUpdateSettings = jest.fn();
+  render(
+    <FieldSettingsPanel
+      field={{ ...field, settings: {} }}
+      fields={[
+        { id: 'field_1', type: 'dropdown', label: 'Department', name: 'department', settings: {} },
+        { id: 'field_2', type: 'email', label: 'Email', name: 'email', settings: {} },
+      ]}
+      onUpdate={() => {}}
+      onUpdateSettings={onUpdateSettings}
+      onDelete={() => {}}
+      onDuplicate={() => {}}
+      onMove={() => {}}
+    />
+  );
+
+  fireEvent.click(screen.getByLabelText('Enable conditional logic'));
+  expect(onUpdateSettings).toHaveBeenCalledWith('field_1', {
+    conditionalLogic: {
+      enabled: true,
+      action: 'show',
+      match: 'all',
+      rules: [{ field: 'email', operator: 'equals', value: '' }],
+    },
+  });
+});
+
+test('field settings panel updates conditional rule values', () => {
+  const onUpdateSettings = jest.fn();
+  render(
+    <FieldSettingsPanel
+      field={{
+        ...field,
+        settings: {
+          conditionalLogic: {
+            enabled: true,
+            action: 'show',
+            match: 'all',
+            rules: [{ field: 'email', operator: 'equals', value: '' }],
+          },
+        },
+      }}
+      fields={[
+        { id: 'field_1', type: 'dropdown', label: 'Department', name: 'department', settings: {} },
+        { id: 'field_2', type: 'email', label: 'Email', name: 'email', settings: {} },
+      ]}
+      onUpdate={() => {}}
+      onUpdateSettings={onUpdateSettings}
+      onDelete={() => {}}
+      onDuplicate={() => {}}
+      onMove={() => {}}
+    />
+  );
+
+  fireEvent.change(screen.getByLabelText('Conditional action'), { target: { value: 'hide' } });
+  fireEvent.change(screen.getByLabelText('Rule value'), { target: { value: 'sales@example.com' } });
+
+  expect(onUpdateSettings).toHaveBeenCalledWith('field_1', expect.objectContaining({
+    conditionalLogic: expect.objectContaining({ action: 'hide' }),
+  }));
+  expect(onUpdateSettings).toHaveBeenCalledWith('field_1', expect.objectContaining({
+    conditionalLogic: expect.objectContaining({
+      rules: [{ field: 'email', operator: 'equals', value: 'sales@example.com' }],
+    }),
+  }));
+});

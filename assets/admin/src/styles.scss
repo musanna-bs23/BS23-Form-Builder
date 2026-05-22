@@ -273,6 +273,42 @@
   color: #b42318;
 }
 
+.bs23-field-settings__logic {
+  border-top: 1px solid #e5e7eb;
+  margin-top: 8px;
+  padding-top: 12px;
+}
+
+.bs23-field-settings__logic p {
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.bs23-field-settings__logic-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.bs23-field-settings__logic-grid select,
+.bs23-field-settings__logic-rule select {
+  border: 1px solid #d5dde8;
+  border-radius: 8px;
+  min-height: 38px;
+  padding: 8px 10px;
+  width: 100%;
+}
+
+.bs23-field-settings__logic-rule {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+}
+
 @media (max-width: 960px) {
   .bs23-builder__workspace {
     grid-template-columns: 1fr;

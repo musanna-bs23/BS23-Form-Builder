@@ -116,6 +116,7 @@ export default function App() {
         <div className="bs23-builder__side">
           <FieldSettingsPanel
             field={selectedField}
+            fields={schema.fields}
             onDelete={(fieldId) => {
               setSchema((currentSchema) => deleteField(currentSchema, fieldId));
               setSelectedFieldId(null);

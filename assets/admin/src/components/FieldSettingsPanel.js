@@ -1,6 +1,13 @@
+import {
+  conditionNeedsValue,
+  conditionalOperators,
+  conditionSourceFields,
+  defaultConditionalLogic,
+} from '../conditional-logic';
+
 const choiceTypes = ['dropdown', 'radio', 'checkbox', 'multiple_choice'];
 
-export default function FieldSettingsPanel({ field, onUpdate, onUpdateSettings, onDelete, onDuplicate, onMove }) {
+export default function FieldSettingsPanel({ field, fields = [], onUpdate, onUpdateSettings, onDelete, onDuplicate, onMove }) {
   if (!field) {
     return (
       <aside className="bs23-field-settings">
@@ -11,8 +18,33 @@ export default function FieldSettingsPanel({ field, onUpdate, onUpdateSettings, 
   }
 
   const settings = field.settings || {};
+  const sourceFields = conditionSourceFields(fields, field.id);
+  const conditionalLogic = settings.conditionalLogic || { enabled: false, action: 'show', match: 'all', rules: [] };
   const setField = (key, value) => onUpdate(field.id, { [key]: value });
   const setSetting = (key, value) => onUpdateSettings(field.id, { [key]: value });
+  const setConditionalLogic = (updates) => setSetting('conditionalLogic', { ...conditionalLogic, ...updates });
+  const ensureConditionalLogic = () => {
+    setSetting('conditionalLogic', defaultConditionalLogic(sourceFields[0]?.name || ''));
+  };
+  const updateRule = (index, updates) => {
+    const rules = conditionalLogic.rules?.length ? conditionalLogic.rules : defaultConditionalLogic(sourceFields[0]?.name || '').rules;
+    setConditionalLogic({
+      rules: rules.map((rule, ruleIndex) => (ruleIndex === index ? { ...rule, ...updates } : rule)),
+    });
+  };
+  const addRule = () => {
+    setConditionalLogic({
+      rules: [
+        ...(conditionalLogic.rules || []),
+        { field: sourceFields[0]?.name || '', operator: 'equals', value: '' },
+      ],
+    });
+  };
+  const removeRule = (index) => {
+    setConditionalLogic({
+      rules: (conditionalLogic.rules || []).filter((rule, ruleIndex) => ruleIndex !== index),
+    });
+  };
 
   return (
     <aside className="bs23-field-settings">
@@ -71,6 +103,72 @@ export default function FieldSettingsPanel({ field, onUpdate, onUpdateSettings, 
           <textarea rows="3" value={settings.description || ''} onChange={(event) => setSetting('description', event.target.value)} />
         </label>
       )}
+
+      <section className="bs23-field-settings__logic">
+        <label className="bs23-field-settings__toggle">
+          <input
+            type="checkbox"
+            checked={!!conditionalLogic.enabled}
+            disabled={sourceFields.length === 0}
+            onChange={(event) => {
+              if (event.target.checked) {
+                ensureConditionalLogic();
+                return;
+              }
+              setConditionalLogic({ enabled: false });
+            }}
+          />
+          Enable conditional logic
+        </label>
+
+        {sourceFields.length === 0 && (
+          <p>Add another input field before this logic can be configured.</p>
+        )}
+
+        {!!conditionalLogic.enabled && sourceFields.length > 0 && (
+          <div className="bs23-field-settings__logic-grid">
+            <label>Conditional action
+              <select value={conditionalLogic.action || 'show'} onChange={(event) => setConditionalLogic({ action: event.target.value })}>
+                <option value="show">Show this field</option>
+                <option value="hide">Hide this field</option>
+              </select>
+            </label>
+            <label>Match
+              <select value={conditionalLogic.match || 'all'} onChange={(event) => setConditionalLogic({ match: event.target.value })}>
+                <option value="all">All rules</option>
+                <option value="any">Any rule</option>
+              </select>
+            </label>
+
+            {(conditionalLogic.rules || []).map((rule, index) => (
+              <div className="bs23-field-settings__logic-rule" key={`${rule.field}-${index}`}>
+                <label>Source field
+                  <select value={rule.field || ''} onChange={(event) => updateRule(index, { field: event.target.value })}>
+                    {sourceFields.map((source) => (
+                      <option key={source.id} value={source.name}>{source.label}</option>
+                    ))}
+                  </select>
+                </label>
+                <label>Operator
+                  <select value={rule.operator || 'equals'} onChange={(event) => updateRule(index, { operator: event.target.value })}>
+                    {conditionalOperators.map((operator) => (
+                      <option key={operator.value} value={operator.value}>{operator.label}</option>
+                    ))}
+                  </select>
+                </label>
+                {conditionNeedsValue(rule.operator || 'equals') && (
+                  <label>Rule value
+                    <input value={rule.value || ''} onChange={(event) => updateRule(index, { value: event.target.value })} />
+                  </label>
+                )}
+                <button type="button" onClick={() => removeRule(index)}>Remove</button>
+              </div>
+            ))}
+
+            <button type="button" onClick={addRule}>Add condition</button>
+          </div>
+        )}
+      </section>
 
       <footer>
         <button type="button" onClick={() => onMove(field.id, 'up')}>Up</button>
