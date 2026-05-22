@@ -7,6 +7,8 @@ use InvalidArgumentException;
 
 final class SchemaValidator
 {
+    private const CONDITIONAL_OPERATORS = ['equals', 'not_equals', 'contains', 'is_empty', 'is_not_empty'];
+
     private const FIELD_TYPES = [
         'name', 'email', 'text', 'mask', 'textarea', 'address', 'country', 'number',
         'dropdown', 'radio', 'checkbox', 'multiple_choice', 'url', 'datetime',
@@ -105,12 +107,49 @@ final class SchemaValidator
 
         foreach ($settings as $key => $value) {
             $safeKey = sanitize_key(str_replace(' ', '_', (string) $key));
+            if ($safeKey === 'conditionallogic' || $safeKey === 'conditionalLogic') {
+                if (is_array($value)) {
+                    $sanitized['conditionalLogic'] = $this->sanitizeConditionalLogic($value);
+                }
+                continue;
+            }
             if (is_scalar($value)) {
                 $sanitized[$safeKey] = sanitize_text_field((string) $value);
             }
         }
 
         return $sanitized;
+    }
+
+    private function sanitizeConditionalLogic(array $logic): array
+    {
+        $rules = [];
+        $rawRules = is_array($logic['rules'] ?? null) ? $logic['rules'] : [];
+
+        foreach ($rawRules as $rule) {
+            if (! is_array($rule)) {
+                continue;
+            }
+
+            $field = sanitize_key((string) ($rule['field'] ?? ''));
+            $operator = sanitize_key((string) ($rule['operator'] ?? ''));
+            if ($field === '' || ! in_array($operator, self::CONDITIONAL_OPERATORS, true)) {
+                continue;
+            }
+
+            $rules[] = [
+                'field' => $field,
+                'operator' => $operator,
+                'value' => is_scalar($rule['value'] ?? '') ? sanitize_text_field((string) $rule['value']) : '',
+            ];
+        }
+
+        return [
+            'enabled' => $this->sanitizeRequired($logic['enabled'] ?? false),
+            'action' => ($logic['action'] ?? 'show') === 'hide' ? 'hide' : 'show',
+            'match' => ($logic['match'] ?? 'all') === 'any' ? 'any' : 'all',
+            'rules' => $rules,
+        ];
     }
 
     private function parseInteger($value): ?int

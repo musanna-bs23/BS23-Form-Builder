@@ -234,4 +234,43 @@ final class SchemaValidatorTest extends WP_UnitTestCase
         $this->assertTrue($result['fields'][0]['children'][0][0]['required']);
         $this->assertSame([], $result['fields'][0]['children'][1]);
     }
+
+    public function test_conditional_logic_settings_are_sanitized(): void
+    {
+        $result = (new SchemaValidator())->sanitize([
+            'version' => 1,
+            'fields' => [
+                [
+                    'id' => 'field_1',
+                    'type' => 'text',
+                    'label' => 'Team',
+                    'name' => 'team',
+                    'required' => false,
+                    'settings' => [
+                        'conditionalLogic' => [
+                            'enabled' => true,
+                            'action' => 'show',
+                            'match' => 'all',
+                            'rules' => [
+                                ['field' => 'department', 'operator' => 'equals', 'value' => 'Sales'],
+                                ['field' => '', 'operator' => 'bad', 'value' => ['nope']],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        $this->assertSame(
+            [
+                'enabled' => true,
+                'action' => 'show',
+                'match' => 'all',
+                'rules' => [
+                    ['field' => 'department', 'operator' => 'equals', 'value' => 'Sales'],
+                ],
+            ],
+            $result['fields'][0]['settings']['conditionalLogic']
+        );
+    }
 }
