@@ -1,0 +1,58 @@
+.bs23-form {
+  display: grid;
+  gap: 16px;
+  max-width: 760px;
+}
+
+.bs23-form__row {
+  display: grid;
+  gap: 16px;
+}
+
+.bs23-form__row--2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.bs23-form__row--3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.bs23-form__row--4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.bs23-form__field,
+.bs23-form__column {
+  display: grid;
+  gap: 8px;
+}
+
+.bs23-form input:not([type="checkbox"]):not([type="radio"]),
+.bs23-form textarea,
+.bs23-form select {
+  width: 100%;
+  max-width: 100%;
+}
+
+.bs23-form__choices {
+  display: grid;
+  gap: 8px;
+}
+
+.bs23-form__section {
+  width: 100%;
+}
+
+.bs23-form__error {
+  color: #b42318;
+}
+
+.bs23-form__success {
+  color: #027a48;
+}
+
+@media (max-width: 700px) {
+  .bs23-form__row {
+    grid-template-columns: 1fr;
+  }
+}

@@ -24,6 +24,14 @@ require_once BS23_FORM_BUILDER_DIR . 'includes/PostTypes/FormPostType.php';
 require_once BS23_FORM_BUILDER_DIR . 'includes/Builder/SchemaValidator.php';
 require_once BS23_FORM_BUILDER_DIR . 'includes/Rest/FormRestController.php';
 require_once BS23_FORM_BUILDER_DIR . 'includes/Admin/Menu.php';
+require_once BS23_FORM_BUILDER_DIR . 'includes/Install/Installer.php';
+require_once BS23_FORM_BUILDER_DIR . 'includes/Validation/SubmissionValidator.php';
+require_once BS23_FORM_BUILDER_DIR . 'includes/Submission/EntryRepository.php';
+require_once BS23_FORM_BUILDER_DIR . 'includes/Submission/SubmissionHandler.php';
+require_once BS23_FORM_BUILDER_DIR . 'includes/Frontend/Renderer.php';
+require_once BS23_FORM_BUILDER_DIR . 'includes/Frontend/Shortcode.php';
+
+register_activation_hook(__FILE__, [BS23\FormBuilder\Install\Installer::class, 'activate']);
 
 add_action('plugins_loaded', static function (): void {
     (new BS23\FormBuilder\Plugin())->register();
