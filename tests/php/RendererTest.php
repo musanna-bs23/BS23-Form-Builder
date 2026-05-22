@@ -48,6 +48,36 @@ final class RendererTest extends WP_UnitTestCase
         $this->assertStringContainsString('Next', $html);
     }
 
+    public function test_renderer_skips_hidden_conditional_field(): void
+    {
+        $html = $this->renderer()->render(123, [
+            'version' => 1,
+            'fields' => [
+                ['id' => 'field_1', 'type' => 'text', 'label' => 'Department', 'name' => 'department', 'settings' => ['default' => 'Support']],
+                [
+                    'id' => 'field_2',
+                    'type' => 'email',
+                    'label' => 'Sales Email',
+                    'name' => 'sales_email',
+                    'required' => true,
+                    'settings' => [
+                        'conditionalLogic' => [
+                            'enabled' => true,
+                            'action' => 'show',
+                            'match' => 'all',
+                            'rules' => [
+                                ['field' => 'department', 'operator' => 'equals', 'value' => 'Sales'],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        $this->assertStringNotContainsString('sales_email', $html);
+        $this->assertStringNotContainsString('Sales Email', $html);
+    }
+
     private function renderer(): Renderer
     {
         return new Renderer(new SubmissionHandler(new SubmissionValidator(), new EntryRepository()));

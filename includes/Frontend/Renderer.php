@@ -3,22 +3,29 @@ declare(strict_types=1);
 
 namespace BS23\FormBuilder\Frontend;
 
+use BS23\FormBuilder\ConditionalLogic\Evaluator;
 use BS23\FormBuilder\Submission\SubmissionHandler;
 
 final class Renderer
 {
+    private Evaluator $conditionalLogic;
     private SubmissionHandler $submissions;
     private bool $hasSubmit = false;
 
-    public function __construct(SubmissionHandler $submissions)
+    public function __construct(SubmissionHandler $submissions, ?Evaluator $conditionalLogic = null)
     {
         $this->submissions = $submissions;
+        $this->conditionalLogic = $conditionalLogic ?: new Evaluator();
     }
 
     public function render(int $formId, array $schema): string
     {
         $this->hasSubmit = false;
         $state = $this->submissions->stateFor($formId);
+        $state['conditional_values'] = array_merge(
+            $this->defaultValues($schema['fields'] ?? []),
+            is_array($state['values'] ?? null) ? $state['values'] : []
+        );
 
         ob_start();
         ?>
@@ -55,6 +62,10 @@ final class Renderer
     private function fieldMarkup(array $field, array $state): string
     {
         $type = (string) ($field['type'] ?? '');
+
+        if (! $this->conditionalLogic->isVisible($field, $this->conditionalValues($state))) {
+            return '';
+        }
 
         if ($type === 'container') {
             return $this->containerMarkup($field, $state);
@@ -241,6 +252,40 @@ final class Renderer
         $value = $state['values'][$name] ?? ($field['settings']['default'] ?? '');
 
         return is_scalar($value) ? (string) $value : '';
+    }
+
+    private function conditionalValues(array $state): array
+    {
+        $values = is_array($state['conditional_values'] ?? null) ? $state['conditional_values'] : [];
+
+        return array_map(static fn ($value) => is_scalar($value) || is_array($value) ? $value : '', $values);
+    }
+
+    private function defaultValues(array $fields): array
+    {
+        $values = [];
+
+        foreach ($fields as $field) {
+            if (! is_array($field)) {
+                continue;
+            }
+
+            if (($field['type'] ?? '') === 'container') {
+                foreach (($field['children'] ?? []) as $column) {
+                    if (is_array($column)) {
+                        $values = array_merge($values, $this->defaultValues($column));
+                    }
+                }
+                continue;
+            }
+
+            $name = $this->fieldName($field);
+            if ($name !== '' && isset($field['settings']['default'])) {
+                $values[$name] = $field['settings']['default'];
+            }
+        }
+
+        return $values;
     }
 
     private function requiredAttr(array $field): string

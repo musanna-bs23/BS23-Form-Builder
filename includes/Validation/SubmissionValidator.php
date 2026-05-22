@@ -3,12 +3,21 @@ declare(strict_types=1);
 
 namespace BS23\FormBuilder\Validation;
 
+use BS23\FormBuilder\ConditionalLogic\Evaluator;
+
 final class SubmissionValidator
 {
     private const SUPPORTED_FIELDS = [
         'name', 'email', 'text', 'textarea', 'number', 'dropdown', 'radio', 'checkbox',
         'multiple_choice', 'url', 'phone', 'hidden',
     ];
+
+    private Evaluator $conditionalLogic;
+
+    public function __construct(?Evaluator $conditionalLogic = null)
+    {
+        $this->conditionalLogic = $conditionalLogic ?: new Evaluator();
+    }
 
     public function validate(array $schema, array $input): array
     {
@@ -17,6 +26,10 @@ final class SubmissionValidator
 
         foreach ($this->fields($schema['fields'] ?? []) as $field) {
             $type = $field['type'] ?? '';
+
+            if (! $this->conditionalLogic->isVisible($field, $input)) {
+                continue;
+            }
 
             if (! in_array($type, self::SUPPORTED_FIELDS, true)) {
                 continue;

@@ -62,6 +62,39 @@ final class SubmissionValidatorTest extends WP_UnitTestCase
         $this->assertArrayHasKey('email', $result['errors']);
     }
 
+    public function test_hidden_conditional_required_field_is_skipped(): void
+    {
+        $schema = [
+            'version' => 1,
+            'fields' => [
+                ['id' => 'field_1', 'type' => 'text', 'label' => 'Department', 'name' => 'department', 'required' => false],
+                [
+                    'id' => 'field_2',
+                    'type' => 'email',
+                    'label' => 'Sales Email',
+                    'name' => 'sales_email',
+                    'required' => true,
+                    'settings' => [
+                        'conditionalLogic' => [
+                            'enabled' => true,
+                            'action' => 'show',
+                            'match' => 'all',
+                            'rules' => [
+                                ['field' => 'department', 'operator' => 'equals', 'value' => 'Sales'],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        $result = (new SubmissionValidator())->validate($schema, ['department' => 'Support', 'sales_email' => 'bad']);
+
+        $this->assertTrue($result['valid']);
+        $this->assertArrayNotHasKey('sales_email', $result['data']);
+        $this->assertArrayNotHasKey('sales_email', $result['errors']);
+    }
+
     private function schema(): array
     {
         return [
