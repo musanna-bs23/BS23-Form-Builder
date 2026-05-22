@@ -22,6 +22,7 @@ define('BS23_FORM_BUILDER_VERSION', '0.1.0');
 require_once BS23_FORM_BUILDER_DIR . 'includes/Plugin.php';
 require_once BS23_FORM_BUILDER_DIR . 'includes/PostTypes/FormPostType.php';
 require_once BS23_FORM_BUILDER_DIR . 'includes/Builder/SchemaValidator.php';
+require_once BS23_FORM_BUILDER_DIR . 'includes/Rest/FormRestController.php';
 
 add_action('plugins_loaded', static function (): void {
     (new BS23\FormBuilder\Plugin())->register();
