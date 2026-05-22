@@ -1,16 +1,24 @@
 import apiFetch from '@wordpress/api-fetch';
-import { useState } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 
 import Canvas from './components/Canvas';
 import Palette from './components/Palette';
 import SaveBar from './components/SaveBar';
+import SettingsPanel from './components/SettingsPanel';
 import { addFieldToContainer, addFieldToRoot } from './schema';
+import { defaultSettings, loadSettings, saveSettings, sendTestEmail } from './settings-api';
 
 export default function App() {
   const [title, setTitle] = useState('Untitled Form');
   const [schema, setSchema] = useState({ version: 1, fields: [] });
   const [formId, setFormId] = useState(null);
   const [status, setStatus] = useState('');
+  const [settings, setSettings] = useState(defaultSettings());
+  const [settingsStatus, setSettingsStatus] = useState('');
+
+  useEffect(() => {
+    loadSettings(formId).then(setSettings).catch(() => setSettings(defaultSettings()));
+  }, [formId]);
 
   const handleRootDrop = (type) => {
     if (!type) {
@@ -45,6 +53,33 @@ export default function App() {
     }
   };
 
+  const saveFormSettings = async () => {
+    if (!formId) {
+      return;
+    }
+    setSettingsStatus('Saving...');
+    try {
+      const saved = await saveSettings(formId, settings);
+      setSettings(saved);
+      setSettingsStatus('Settings saved');
+    } catch (error) {
+      setSettingsStatus(error?.message || 'Settings save failed');
+    }
+  };
+
+  const testEmail = async () => {
+    if (!formId) {
+      return;
+    }
+    setSettingsStatus('Sending test...');
+    try {
+      const response = await sendTestEmail(formId, settings);
+      setSettingsStatus(response?.sent ? 'Test email sent' : 'Test email failed');
+    } catch (error) {
+      setSettingsStatus(error?.message || 'Test email failed');
+    }
+  };
+
   return (
     <div className="bs23-builder">
       <SaveBar
@@ -59,7 +94,17 @@ export default function App() {
           onDropContainer={handleContainerDrop}
           onDropRoot={handleRootDrop}
         />
-        <Palette />
+        <div className="bs23-builder__side">
+          <Palette />
+          <SettingsPanel
+            formId={formId}
+            onChange={setSettings}
+            onSave={saveFormSettings}
+            onTest={testEmail}
+            settings={settings}
+            status={settingsStatus}
+          />
+        </div>
       </main>
     </div>
   );

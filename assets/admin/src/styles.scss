@@ -52,6 +52,12 @@
   padding: 14px;
 }
 
+.bs23-builder__side {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+
 .bs23-builder__empty-state {
   display: grid;
   place-items: center;
@@ -152,6 +158,60 @@
   justify-self: center;
   color: #667085;
   font-size: 13px;
+}
+
+.bs23-settings-panel {
+  display: grid;
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid #d7dde8;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.bs23-settings-panel header,
+.bs23-settings-panel footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.bs23-settings-panel h2,
+.bs23-settings-panel h3 {
+  margin: 0;
+}
+
+.bs23-settings-panel h2 {
+  font-size: 16px;
+}
+
+.bs23-settings-panel h3 {
+  font-size: 13px;
+  color: #334155;
+  text-transform: uppercase;
+}
+
+.bs23-settings-panel section,
+.bs23-settings-panel label {
+  display: grid;
+  gap: 8px;
+}
+
+.bs23-settings-panel label {
+  color: #475569;
+  font-weight: 600;
+}
+
+.bs23-settings-panel input:not([type="checkbox"]),
+.bs23-settings-panel textarea {
+  width: 100%;
+}
+
+.bs23-settings-panel__toggle {
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  justify-content: start;
 }
 
 @media (max-width: 960px) {

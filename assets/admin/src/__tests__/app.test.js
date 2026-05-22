@@ -1,8 +1,10 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import App from '../app';
 
-test('renders palette groups and adds email field to canvas', () => {
+test('renders palette groups and adds email field to canvas', async () => {
   render(<App />);
+
+  await waitFor(() => expect(screen.getByText('Form Settings')).not.toBeNull());
 
   expect(screen.getByText('General Fields')).not.toBeNull();
 

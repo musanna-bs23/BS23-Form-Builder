@@ -5,6 +5,8 @@ namespace BS23\FormBuilder\Submission;
 
 use BS23\FormBuilder\PostTypes\FormPostType;
 use BS23\FormBuilder\Rest\FormRestController;
+use BS23\FormBuilder\Notifications\Mailer;
+use BS23\FormBuilder\Settings\FormSettings;
 use BS23\FormBuilder\Validation\SubmissionValidator;
 
 final class SubmissionHandler
@@ -13,12 +15,16 @@ final class SubmissionHandler
 
     private SubmissionValidator $validator;
     private EntryRepository $entries;
+    private FormSettings $settings;
+    private Mailer $mailer;
     private array $states = [];
 
-    public function __construct(SubmissionValidator $validator, EntryRepository $entries)
+    public function __construct(SubmissionValidator $validator, EntryRepository $entries, ?FormSettings $settings = null, ?Mailer $mailer = null)
     {
         $this->validator = $validator;
         $this->entries = $entries;
+        $this->settings = $settings ?: new FormSettings();
+        $this->mailer = $mailer ?: new Mailer($this->settings, new \BS23\FormBuilder\Notifications\TemplateRenderer());
     }
 
     public function register(): void
@@ -79,11 +85,19 @@ final class SubmissionHandler
             return;
         }
 
+        $settings = $this->settings->get($formId);
+        $this->mailer->send($formId, $entryId, $result['data'], $settings);
+
         $this->states[$formId] = [
-            'success' => __('Thanks, your submission has been received.', 'bs23-form-builder'),
+            'success' => (string) ($settings['confirmation']['message'] ?? __('Thanks, your submission has been received.', 'bs23-form-builder')),
             'errors' => [],
             'values' => [],
         ];
+
+        if (! empty($settings['confirmation']['redirect_url']) && ! headers_sent()) {
+            wp_safe_redirect((string) $settings['confirmation']['redirect_url']);
+            exit;
+        }
     }
 
     public function nonceAction(int $formId): string
