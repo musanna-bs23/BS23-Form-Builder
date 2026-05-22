@@ -113,6 +113,12 @@ final class SchemaValidator
                 }
                 continue;
             }
+            if ($safeKey === 'validation') {
+                if (is_array($value)) {
+                    $sanitized['validation'] = $this->sanitizeValidation($value);
+                }
+                continue;
+            }
             if (is_scalar($value)) {
                 $sanitized[$safeKey] = sanitize_text_field((string) $value);
             }
@@ -150,6 +156,41 @@ final class SchemaValidator
             'match' => ($logic['match'] ?? 'all') === 'any' ? 'any' : 'all',
             'rules' => $rules,
         ];
+    }
+
+    private function sanitizeValidation(array $validation): array
+    {
+        $sanitized = [];
+
+        foreach (['minLength', 'maxLength'] as $key) {
+            if (isset($validation[$key]) && preg_match('/^(0|[1-9][0-9]*)$/', (string) $validation[$key]) === 1) {
+                $sanitized[$key] = (string) $validation[$key];
+            }
+        }
+
+        foreach (['minValue', 'maxValue', 'maxFileSizeMb'] as $key) {
+            if (isset($validation[$key]) && preg_match('/^-?(0|[1-9][0-9]*)(\.[0-9]+)?$/', (string) $validation[$key]) === 1) {
+                $sanitized[$key] = (string) $validation[$key];
+            }
+        }
+
+        foreach (['pattern', 'patternMessage'] as $key) {
+            if (isset($validation[$key]) && is_scalar($validation[$key])) {
+                $sanitized[$key] = sanitize_text_field((string) $validation[$key]);
+            }
+        }
+
+        if (isset($validation['allowedExtensions']) && is_scalar($validation['allowedExtensions'])) {
+            $extensions = array_filter(array_map(
+                static fn (string $extension): string => sanitize_key(ltrim(trim(strtolower($extension)), '.')),
+                preg_split('/[\s,]+/', (string) $validation['allowedExtensions']) ?: []
+            ));
+            if ($extensions !== []) {
+                $sanitized['allowedExtensions'] = implode(',', array_values(array_unique($extensions)));
+            }
+        }
+
+        return $sanitized;
     }
 
     private function parseInteger($value): ?int

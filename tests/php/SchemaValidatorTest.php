@@ -273,4 +273,46 @@ final class SchemaValidatorTest extends WP_UnitTestCase
             $result['fields'][0]['settings']['conditionalLogic']
         );
     }
+
+    public function test_advanced_validation_settings_are_sanitized(): void
+    {
+        $result = (new SchemaValidator())->sanitize([
+            'version' => 1,
+            'fields' => [
+                [
+                    'id' => 'field_1',
+                    'type' => 'text',
+                    'label' => 'Code',
+                    'name' => 'code',
+                    'settings' => [
+                        'validation' => [
+                            'minLength' => '3',
+                            'maxLength' => '12',
+                            'minValue' => '-5',
+                            'maxValue' => '99.5',
+                            'pattern' => '^[A-Z]+$',
+                            'patternMessage' => '<b>Uppercase only</b>',
+                            'maxFileSizeMb' => '5',
+                            'allowedExtensions' => ' JPG, png, .PDF, bad<script> ',
+                            'unsafe' => ['skip'],
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        $this->assertSame(
+            [
+                'minLength' => '3',
+                'maxLength' => '12',
+                'minValue' => '-5',
+                'maxValue' => '99.5',
+                'pattern' => '^[A-Z]+$',
+                'patternMessage' => 'Uppercase only',
+                'maxFileSizeMb' => '5',
+                'allowedExtensions' => 'jpg,png,pdf,badscript',
+            ],
+            $result['fields'][0]['settings']['validation']
+        );
+    }
 }
