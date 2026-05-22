@@ -80,6 +80,14 @@ final class Renderer
             return $this->wrapField($field, '<div class="bs23-form__html">' . wp_kses_post((string) ($field['settings']['content'] ?? $field['label'] ?? '')) . '</div>', $state, ['bs23-form__field--html']);
         }
 
+        if ($type === 'form_step') {
+            return sprintf(
+                '<div class="bs23-form__step-marker" data-bs23-field-id="%s" data-bs23-step-marker>%s</div>',
+                esc_attr((string) ($field['id'] ?? '')),
+                esc_html((string) ($field['label'] ?? __('Step', 'bs23-form-builder')))
+            );
+        }
+
         if ($type === 'submit') {
             $this->hasSubmit = true;
 

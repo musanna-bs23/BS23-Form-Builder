@@ -64,6 +64,51 @@
   color: #027a48;
 }
 
+.bs23-form__steps {
+  border-bottom: 1px solid #e5e7eb;
+  display: grid;
+  gap: 10px;
+  padding-bottom: 12px;
+}
+
+.bs23-form__steps-status {
+  color: #475569;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.bs23-form__steps-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.bs23-form__step-indicator {
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  color: #334155;
+  padding: 7px 12px;
+}
+
+.bs23-form__step-indicator.is-active {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+  color: #ffffff;
+}
+
+.bs23-form__step-marker {
+  color: #0f172a;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.bs23-form__step-nav {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+
 @media (max-width: 700px) {
   .bs23-form__row {
     grid-template-columns: 1fr;

@@ -79,6 +79,20 @@ final class RendererTest extends WP_UnitTestCase
         $this->assertStringContainsString('sales_email', $html);
     }
 
+    public function test_renderer_outputs_form_step_markers(): void
+    {
+        $html = $this->renderer()->render(123, [
+            'version' => 1,
+            'fields' => [
+                ['id' => 'step_1', 'type' => 'form_step', 'label' => 'Contact', 'name' => 'step'],
+                ['id' => 'field_1', 'type' => 'text', 'label' => 'Name', 'name' => 'name'],
+            ],
+        ]);
+
+        $this->assertStringContainsString('data-bs23-step-marker', $html);
+        $this->assertStringContainsString('Contact', $html);
+    }
+
     private function renderer(): Renderer
     {
         return new Renderer(new SubmissionHandler(new SubmissionValidator(), new EntryRepository()));
