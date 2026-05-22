@@ -13,11 +13,18 @@
       "BS23\\FormBuilder\\Tests\\": "tests/php/"
     }
   },
-  "require": {},
+  "require": {
+    "php": ">=7.4"
+  },
   "require-dev": {
     "phpunit/phpunit": "^9.6"
   },
   "scripts": {
     "test": "phpunit"
+  },
+  "config": {
+    "platform": {
+      "php": "7.4.33"
+    }
   }
 }
