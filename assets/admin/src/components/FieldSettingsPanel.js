@@ -4,6 +4,7 @@ import {
   conditionSourceFields,
   defaultConditionalLogic,
 } from '../conditional-logic';
+import { validationCapabilities } from '../advanced-validation';
 
 const choiceTypes = ['dropdown', 'radio', 'checkbox', 'multiple_choice'];
 
@@ -20,8 +21,11 @@ export default function FieldSettingsPanel({ field, fields = [], onUpdate, onUpd
   const settings = field.settings || {};
   const sourceFields = conditionSourceFields(fields, field.id);
   const conditionalLogic = settings.conditionalLogic || { enabled: false, action: 'show', match: 'all', rules: [] };
+  const validation = settings.validation || {};
+  const validationSupport = validationCapabilities(field.type);
   const setField = (key, value) => onUpdate(field.id, { [key]: value });
   const setSetting = (key, value) => onUpdateSettings(field.id, { [key]: value });
+  const setValidation = (key, value) => setSetting('validation', { [key]: value });
   const setConditionalLogic = (updates) => setSetting('conditionalLogic', { ...conditionalLogic, ...updates });
   const ensureConditionalLogic = () => {
     setSetting('conditionalLogic', defaultConditionalLogic(sourceFields[0]?.name || ''));
@@ -102,6 +106,48 @@ export default function FieldSettingsPanel({ field, fields = [], onUpdate, onUpd
         <label>Description
           <textarea rows="3" value={settings.description || ''} onChange={(event) => setSetting('description', event.target.value)} />
         </label>
+      )}
+
+      {(validationSupport.text || validationSupport.numeric || validationSupport.upload) && (
+        <section className="bs23-field-settings__advanced">
+          <h3>Advanced Validation</h3>
+          {validationSupport.text && (
+            <>
+              <label>Min characters
+                <input value={validation.minLength || ''} onChange={(event) => setValidation('minLength', event.target.value)} />
+              </label>
+              <label>Max characters
+                <input value={validation.maxLength || ''} onChange={(event) => setValidation('maxLength', event.target.value)} />
+              </label>
+              <label>Regex pattern
+                <input value={validation.pattern || ''} onChange={(event) => setValidation('pattern', event.target.value)} />
+              </label>
+              <label>Regex message
+                <input value={validation.patternMessage || ''} onChange={(event) => setValidation('patternMessage', event.target.value)} />
+              </label>
+            </>
+          )}
+          {validationSupport.numeric && (
+            <>
+              <label>Minimum value
+                <input value={validation.minValue || ''} onChange={(event) => setValidation('minValue', event.target.value)} />
+              </label>
+              <label>Maximum value
+                <input value={validation.maxValue || ''} onChange={(event) => setValidation('maxValue', event.target.value)} />
+              </label>
+            </>
+          )}
+          {validationSupport.upload && (
+            <>
+              <label>Max file size (MB)
+                <input value={validation.maxFileSizeMb || ''} onChange={(event) => setValidation('maxFileSizeMb', event.target.value)} />
+              </label>
+              <label>Allowed extensions
+                <input value={validation.allowedExtensions || ''} onChange={(event) => setValidation('allowedExtensions', event.target.value)} />
+              </label>
+            </>
+          )}
+        </section>
       )}
 
       <section className="bs23-field-settings__logic">

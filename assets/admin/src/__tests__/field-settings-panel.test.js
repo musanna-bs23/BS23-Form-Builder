@@ -110,3 +110,59 @@ test('field settings panel updates conditional rule values', () => {
     }),
   }));
 });
+
+test('field settings panel updates text validation settings', () => {
+  const onUpdateSettings = jest.fn();
+  render(
+    <FieldSettingsPanel
+      field={{ id: 'field_text', type: 'text', label: 'Code', name: 'code', settings: {} }}
+      fields={[]}
+      onUpdate={() => {}}
+      onUpdateSettings={onUpdateSettings}
+      onDelete={() => {}}
+      onDuplicate={() => {}}
+      onMove={() => {}}
+    />
+  );
+
+  fireEvent.change(screen.getByLabelText('Min characters'), { target: { value: '3' } });
+  fireEvent.change(screen.getByLabelText('Regex pattern'), { target: { value: '^[A-Z]+$' } });
+
+  expect(onUpdateSettings).toHaveBeenCalledWith('field_text', {
+    validation: { minLength: '3' },
+  });
+  expect(onUpdateSettings).toHaveBeenCalledWith('field_text', {
+    validation: { pattern: '^[A-Z]+$' },
+  });
+});
+
+test('field settings panel shows numeric and upload validation controls by type', () => {
+  const { rerender } = render(
+    <FieldSettingsPanel
+      field={{ id: 'field_number', type: 'number', label: 'Age', name: 'age', settings: {} }}
+      fields={[]}
+      onUpdate={() => {}}
+      onUpdateSettings={() => {}}
+      onDelete={() => {}}
+      onDuplicate={() => {}}
+      onMove={() => {}}
+    />
+  );
+
+  expect(screen.getByLabelText('Minimum value')).not.toBeNull();
+
+  rerender(
+    <FieldSettingsPanel
+      field={{ id: 'field_file', type: 'file_upload', label: 'Resume', name: 'resume', settings: {} }}
+      fields={[]}
+      onUpdate={() => {}}
+      onUpdateSettings={() => {}}
+      onDelete={() => {}}
+      onDuplicate={() => {}}
+      onMove={() => {}}
+    />
+  );
+
+  expect(screen.getByLabelText('Max file size (MB)')).not.toBeNull();
+  expect(screen.getByLabelText('Allowed extensions')).not.toBeNull();
+});

@@ -273,6 +273,20 @@
   color: #b42318;
 }
 
+.bs23-field-settings__advanced {
+  border-top: 1px solid #e5e7eb;
+  display: grid;
+  gap: 10px;
+  margin-top: 8px;
+  padding-top: 12px;
+}
+
+.bs23-field-settings__advanced h3 {
+  color: #0f172a;
+  font-size: 14px;
+  margin: 0;
+}
+
 .bs23-field-settings__logic {
   border-top: 1px solid #e5e7eb;
   margin-top: 8px;
