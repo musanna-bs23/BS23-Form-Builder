@@ -18,7 +18,7 @@ final class SchemaValidator
 
     public function sanitize(array $schema): array
     {
-        $version = isset($schema['version']) ? absint($schema['version']) : 1;
+        $version = isset($schema['version']) ? $this->parseInteger($schema['version']) : 1;
 
         if ($version !== 1) {
             throw new InvalidArgumentException('Unsupported schema version.');
@@ -32,35 +32,46 @@ final class SchemaValidator
 
         return [
             'version' => 1,
-            'fields' => array_map([$this, 'sanitizeField'], $fields),
+            'fields' => $this->sanitizeFields($fields),
         ];
+    }
+
+    private function sanitizeFields(array $fields): array
+    {
+        $sanitized = [];
+
+        foreach ($fields as $field) {
+            if (! is_array($field)) {
+                throw new InvalidArgumentException('Field must be an object.');
+            }
+
+            $sanitized[] = $this->sanitizeField($field);
+        }
+
+        return $sanitized;
     }
 
     private function sanitizeField(array $field): array
     {
-        $type = sanitize_key((string) ($field['type'] ?? ''));
-
-        if (! in_array($type, self::FIELD_TYPES, true)) {
-            throw new InvalidArgumentException(sprintf('Invalid field type: %s', $type));
-        }
+        $type = $this->sanitizeType($field['type'] ?? '');
 
         if ($type === 'container') {
             return $this->sanitizeContainer($field);
         }
 
         return [
-            'id' => sanitize_key((string) ($field['id'] ?? wp_unique_id('field_'))),
+            'id' => $this->sanitizeId($field['id'] ?? null, 'field_'),
             'type' => $type,
             'label' => sanitize_text_field((string) ($field['label'] ?? 'Field')),
             'name' => sanitize_key(str_replace(' ', '_', (string) ($field['name'] ?? $type))),
-            'required' => (bool) ($field['required'] ?? false),
+            'required' => $this->sanitizeRequired($field['required'] ?? false),
             'settings' => is_array($field['settings'] ?? null) ? $this->sanitizeSettings($field['settings']) : [],
         ];
     }
 
     private function sanitizeContainer(array $field): array
     {
-        $columns = absint($field['columns'] ?? 0);
+        $columns = $this->parseInteger($field['columns'] ?? null);
 
         if (! in_array($columns, [1, 2, 3, 4], true)) {
             throw new InvalidArgumentException('Invalid container column count.');
@@ -77,11 +88,11 @@ final class SchemaValidator
             if (! is_array($column)) {
                 throw new InvalidArgumentException('Container column must be an array.');
             }
-            $sanitizedChildren[] = array_map([$this, 'sanitizeField'], $column);
+            $sanitizedChildren[] = $this->sanitizeFields($column);
         }
 
         return [
-            'id' => sanitize_key((string) ($field['id'] ?? wp_unique_id('container_'))),
+            'id' => $this->sanitizeId($field['id'] ?? null, 'container_'),
             'type' => 'container',
             'columns' => $columns,
             'children' => $sanitizedChildren,
@@ -93,12 +104,55 @@ final class SchemaValidator
         $sanitized = [];
 
         foreach ($settings as $key => $value) {
-            $safeKey = sanitize_key((string) $key);
+            $safeKey = sanitize_key(str_replace(' ', '_', (string) $key));
             if (is_scalar($value)) {
                 $sanitized[$safeKey] = sanitize_text_field((string) $value);
             }
         }
 
         return $sanitized;
+    }
+
+    private function parseInteger($value): ?int
+    {
+        if (is_int($value)) {
+            return $value;
+        }
+
+        if (is_string($value) && preg_match('/^(0|[1-9][0-9]*)$/', $value) === 1) {
+            return (int) $value;
+        }
+
+        return null;
+    }
+
+    private function sanitizeType($type): string
+    {
+        $rawType = is_scalar($type) ? (string) $type : '';
+        $sanitizedType = sanitize_key($rawType);
+
+        if ($rawType !== $sanitizedType || ! in_array($rawType, self::FIELD_TYPES, true)) {
+            throw new InvalidArgumentException(sprintf('Invalid field type: %s', $rawType));
+        }
+
+        return $rawType;
+    }
+
+    private function sanitizeId($id, string $prefix): string
+    {
+        $sanitizedId = is_scalar($id) ? sanitize_key((string) $id) : '';
+
+        if ($sanitizedId === '') {
+            $sanitizedId = sanitize_key(wp_unique_id($prefix));
+        }
+
+        return $sanitizedId;
+    }
+
+    private function sanitizeRequired($required): bool
+    {
+        $sanitized = filter_var($required, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+
+        return $sanitized ?? false;
     }
 }
