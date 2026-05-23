@@ -25,6 +25,8 @@ require_once BS23_FORM_BUILDER_DIR . 'includes/Builder/SchemaValidator.php';
 require_once BS23_FORM_BUILDER_DIR . 'includes/Rest/FormRestController.php';
 require_once BS23_FORM_BUILDER_DIR . 'includes/Admin/Menu.php';
 require_once BS23_FORM_BUILDER_DIR . 'includes/Install/Installer.php';
+require_once BS23_FORM_BUILDER_DIR . 'includes/ConditionalLogic/Evaluator.php';
+require_once BS23_FORM_BUILDER_DIR . 'includes/Validation/RuleValidator.php';
 require_once BS23_FORM_BUILDER_DIR . 'includes/Validation/SubmissionValidator.php';
 require_once BS23_FORM_BUILDER_DIR . 'includes/Security/AntiSpamGuard.php';
 require_once BS23_FORM_BUILDER_DIR . 'includes/Submission/EntryRepository.php';
