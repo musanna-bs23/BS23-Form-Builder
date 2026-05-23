@@ -28,3 +28,18 @@ test('settings panel calls test email action', () => {
 
   expect(onTest).toHaveBeenCalled();
 });
+
+test('settings panel emits changed style payload', () => {
+  const onChange = jest.fn();
+  render(<SettingsPanel formId={1} settings={defaultSettings()} status="" onChange={onChange} onSave={() => {}} onTest={() => {}} />);
+
+  fireEvent.change(screen.getByLabelText('Form width'), { target: { value: '900px' } });
+  fireEvent.change(screen.getByLabelText('Button background'), { target: { value: '#111827' } });
+
+  expect(onChange).toHaveBeenCalledWith(expect.objectContaining({
+    style: expect.objectContaining({ max_width: '900px' }),
+  }));
+  expect(onChange).toHaveBeenCalledWith(expect.objectContaining({
+    style: expect.objectContaining({ button_background: '#111827' }),
+  }));
+});

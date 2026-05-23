@@ -1,6 +1,7 @@
 export default function SettingsPanel({ formId, settings, status, onChange, onSave, onTest }) {
   const notification = settings.notification;
   const confirmation = settings.confirmation;
+  const style = settings.style || {};
 
   const updateNotification = (key, value) => onChange({
     ...settings,
@@ -9,6 +10,10 @@ export default function SettingsPanel({ formId, settings, status, onChange, onSa
   const updateConfirmation = (key, value) => onChange({
     ...settings,
     confirmation: { ...confirmation, [key]: value },
+  });
+  const updateStyle = (key, value) => onChange({
+    ...settings,
+    style: { ...style, [key]: value },
   });
 
   return (
@@ -47,6 +52,48 @@ export default function SettingsPanel({ formId, settings, status, onChange, onSa
         </label>
         <label>Redirect URL
           <input value={confirmation.redirect_url} onChange={(event) => updateConfirmation('redirect_url', event.target.value)} />
+        </label>
+      </section>
+      <section>
+        <h3>Style</h3>
+        <label>Form width
+          <input value={style.max_width || ''} onChange={(event) => updateStyle('max_width', event.target.value)} />
+        </label>
+        <label>Field gap
+          <input value={style.field_gap || ''} onChange={(event) => updateStyle('field_gap', event.target.value)} />
+        </label>
+        <label>Label color
+          <input type="color" value={style.label_color || '#0f172a'} onChange={(event) => updateStyle('label_color', event.target.value)} />
+        </label>
+        <label>Label size
+          <input value={style.label_size || ''} onChange={(event) => updateStyle('label_size', event.target.value)} />
+        </label>
+        <label>Input background
+          <input type="color" value={style.input_background || '#ffffff'} onChange={(event) => updateStyle('input_background', event.target.value)} />
+        </label>
+        <label>Input border
+          <input type="color" value={style.input_border || '#cbd5e1'} onChange={(event) => updateStyle('input_border', event.target.value)} />
+        </label>
+        <label>Input radius
+          <input value={style.input_radius || ''} onChange={(event) => updateStyle('input_radius', event.target.value)} />
+        </label>
+        <label>Button background
+          <input type="color" value={style.button_background || '#2563eb'} onChange={(event) => updateStyle('button_background', event.target.value)} />
+        </label>
+        <label>Button text
+          <input type="color" value={style.button_text || '#ffffff'} onChange={(event) => updateStyle('button_text', event.target.value)} />
+        </label>
+        <label>Button radius
+          <input value={style.button_radius || ''} onChange={(event) => updateStyle('button_radius', event.target.value)} />
+        </label>
+        <label>Error color
+          <input type="color" value={style.error_color || '#b42318'} onChange={(event) => updateStyle('error_color', event.target.value)} />
+        </label>
+        <label>Success color
+          <input type="color" value={style.success_color || '#027a48'} onChange={(event) => updateStyle('success_color', event.target.value)} />
+        </label>
+        <label>Step active
+          <input type="color" value={style.step_active || '#2563eb'} onChange={(event) => updateStyle('step_active', event.target.value)} />
         </label>
       </section>
       <footer>
