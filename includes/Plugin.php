@@ -6,6 +6,7 @@ namespace BS23\FormBuilder;
 use BS23\FormBuilder\Admin\Menu;
 use BS23\FormBuilder\Admin\EntriesPage;
 use BS23\FormBuilder\Builder\SchemaValidator;
+use BS23\FormBuilder\Elementor\Integration as ElementorIntegration;
 use BS23\FormBuilder\Entries\EntryQueryRepository;
 use BS23\FormBuilder\Export\CsvExporter;
 use BS23\FormBuilder\Frontend\Renderer;
@@ -39,5 +40,6 @@ final class Plugin
         (new EntriesPage())->register();
         $submissionHandler->register();
         (new Shortcode($renderer, $formSettings))->register();
+        (new ElementorIntegration())->register();
     }
 }
