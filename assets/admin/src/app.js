@@ -2,6 +2,7 @@ import apiFetch from '@wordpress/api-fetch';
 import { useEffect, useState } from '@wordpress/element';
 
 import Canvas from './components/Canvas';
+import FormLibrary from './components/FormLibrary';
 import Palette from './components/Palette';
 import SaveBar from './components/SaveBar';
 import SettingsPanel from './components/SettingsPanel';
@@ -17,6 +18,7 @@ import {
   updateFieldSettings,
 } from './schema';
 import { defaultSettings, loadSettings, saveSettings, sendTestEmail } from './settings-api';
+import { listForms, loadForm } from './forms-api';
 
 export default function App() {
   const [title, setTitle] = useState('Untitled Form');
@@ -26,10 +28,19 @@ export default function App() {
   const [selectedFieldId, setSelectedFieldId] = useState(null);
   const [settings, setSettings] = useState(defaultSettings());
   const [settingsStatus, setSettingsStatus] = useState('');
+  const [forms, setForms] = useState([]);
 
   useEffect(() => {
+    if (!formId) {
+      setSettings(defaultSettings());
+      return;
+    }
     loadSettings(formId).then(setSettings).catch(() => setSettings(defaultSettings()));
   }, [formId]);
+
+  useEffect(() => {
+    listForms().then((items) => setForms(Array.isArray(items) ? items : [])).catch(() => setForms([]));
+  }, []);
 
   const handleRootDrop = (type) => {
     if (!type) {
@@ -43,6 +54,29 @@ export default function App() {
   };
 
   const selectedField = selectedFieldId ? findField(schema, selectedFieldId) : null;
+
+  const resetDraft = () => {
+    setTitle('Untitled Form');
+    setSchema({ version: 1, fields: [] });
+    setFormId(null);
+    setSelectedFieldId(null);
+    setStatus('');
+    setSettings(defaultSettings());
+  };
+
+  const selectForm = async (nextFormId) => {
+    setStatus('Loading...');
+    try {
+      const form = await loadForm(nextFormId);
+      setFormId(form.id);
+      setTitle(form.title || 'Untitled Form');
+      setSchema(form.schema || { version: 1, fields: [] });
+      setSelectedFieldId(null);
+      setStatus('Loaded');
+    } catch (error) {
+      setStatus(error?.message || 'Load failed');
+    }
+  };
 
   const handleContainerDrop = (containerId, columnIndex, type) => {
     if (!type) {
@@ -99,6 +133,12 @@ export default function App() {
 
   return (
     <div className="bs23-builder">
+      <FormLibrary
+        activeFormId={formId}
+        forms={forms}
+        onNewForm={resetDraft}
+        onSelectForm={selectForm}
+      />
       <SaveBar
         onSave={saveForm}
         onTitleChange={setTitle}
