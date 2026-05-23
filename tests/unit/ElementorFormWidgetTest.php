@@ -41,6 +41,8 @@ namespace Elementor {
     {
         public const SELECT = 'select';
         public const RAW_HTML = 'raw_html';
+        public const COLOR = 'color';
+        public const SLIDER = 'slider';
         public const TAB_CONTENT = 'content';
         public const TAB_STYLE = 'style';
     }
@@ -142,6 +144,27 @@ namespace BS23\FormBuilder\Tests\Unit {
 
             self::assertSame('[bs23_form id="77"]', $GLOBALS['bs23_test_shortcode']);
             self::assertStringContainsString('class="bs23-form"', $html);
+        }
+
+        public function test_widget_registers_style_controls_for_frontend_css_variables(): void
+        {
+            $widget = new TestableFormWidget();
+            $widget->registerControlsForTest();
+
+            self::assertSame(\Elementor\Controls_Manager::TAB_STYLE, $widget->sections['bs23_form_layout_style']['tab']);
+            self::assertSame(\Elementor\Controls_Manager::SLIDER, $widget->controls['max_width']['type']);
+            self::assertSame([
+                '{{WRAPPER}} .bs23-form' => '--bs23-form-max-width: {{SIZE}}{{UNIT}};',
+            ], $widget->controls['max_width']['selectors']);
+
+            self::assertSame(\Elementor\Controls_Manager::COLOR, $widget->controls['button_background']['type']);
+            self::assertSame([
+                '{{WRAPPER}} .bs23-form' => '--bs23-button-background: {{VALUE}};',
+            ], $widget->controls['button_background']['selectors']);
+
+            self::assertSame([
+                '{{WRAPPER}} .bs23-form' => '--bs23-step-active: {{VALUE}};',
+            ], $widget->controls['step_active']['selectors']);
         }
     }
 

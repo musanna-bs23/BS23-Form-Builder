@@ -44,6 +44,8 @@ class FormWidget extends Widget_Base
         ]);
 
         $this->end_controls_section();
+
+        $this->registerStyleControls();
     }
 
     protected function render(): void
@@ -76,5 +78,90 @@ class FormWidget extends Widget_Base
         }
 
         return $options;
+    }
+
+    private function registerStyleControls(): void
+    {
+        $this->start_controls_section('bs23_form_layout_style', [
+            'label' => esc_html__('Layout', 'bs23-form-builder'),
+            'tab' => Controls_Manager::TAB_STYLE,
+        ]);
+        $this->addSliderStyleControl('max_width', esc_html__('Form Width', 'bs23-form-builder'), '--bs23-form-max-width', 760);
+        $this->addSliderStyleControl('field_gap', esc_html__('Field Gap', 'bs23-form-builder'), '--bs23-field-gap', 16);
+        $this->end_controls_section();
+
+        $this->start_controls_section('bs23_form_label_style', [
+            'label' => esc_html__('Labels', 'bs23-form-builder'),
+            'tab' => Controls_Manager::TAB_STYLE,
+        ]);
+        $this->addColorStyleControl('label_color', esc_html__('Label Color', 'bs23-form-builder'), '--bs23-label-color');
+        $this->addSliderStyleControl('label_size', esc_html__('Label Size', 'bs23-form-builder'), '--bs23-label-size', 14);
+        $this->end_controls_section();
+
+        $this->start_controls_section('bs23_form_input_style', [
+            'label' => esc_html__('Inputs', 'bs23-form-builder'),
+            'tab' => Controls_Manager::TAB_STYLE,
+        ]);
+        $this->addColorStyleControl('input_background', esc_html__('Background', 'bs23-form-builder'), '--bs23-input-background');
+        $this->addColorStyleControl('input_border', esc_html__('Border', 'bs23-form-builder'), '--bs23-input-border');
+        $this->addSliderStyleControl('input_radius', esc_html__('Radius', 'bs23-form-builder'), '--bs23-input-radius', 8);
+        $this->end_controls_section();
+
+        $this->start_controls_section('bs23_form_button_style', [
+            'label' => esc_html__('Button', 'bs23-form-builder'),
+            'tab' => Controls_Manager::TAB_STYLE,
+        ]);
+        $this->addColorStyleControl('button_background', esc_html__('Background', 'bs23-form-builder'), '--bs23-button-background');
+        $this->addColorStyleControl('button_text', esc_html__('Text', 'bs23-form-builder'), '--bs23-button-text');
+        $this->addSliderStyleControl('button_radius', esc_html__('Radius', 'bs23-form-builder'), '--bs23-button-radius', 8);
+        $this->end_controls_section();
+
+        $this->start_controls_section('bs23_form_message_style', [
+            'label' => esc_html__('Messages', 'bs23-form-builder'),
+            'tab' => Controls_Manager::TAB_STYLE,
+        ]);
+        $this->addColorStyleControl('error_color', esc_html__('Error Color', 'bs23-form-builder'), '--bs23-error-color');
+        $this->addColorStyleControl('success_color', esc_html__('Success Color', 'bs23-form-builder'), '--bs23-success-color');
+        $this->end_controls_section();
+
+        $this->start_controls_section('bs23_form_step_style', [
+            'label' => esc_html__('Steps', 'bs23-form-builder'),
+            'tab' => Controls_Manager::TAB_STYLE,
+        ]);
+        $this->addColorStyleControl('step_active', esc_html__('Active Step', 'bs23-form-builder'), '--bs23-step-active');
+        $this->end_controls_section();
+    }
+
+    private function addColorStyleControl(string $id, string $label, string $variable): void
+    {
+        $this->add_control($id, [
+            'label' => $label,
+            'type' => Controls_Manager::COLOR,
+            'selectors' => [
+                '{{WRAPPER}} .bs23-form' => $variable . ': {{VALUE}};',
+            ],
+        ]);
+    }
+
+    private function addSliderStyleControl(string $id, string $label, string $variable, int $defaultSize): void
+    {
+        $this->add_control($id, [
+            'label' => $label,
+            'type' => Controls_Manager::SLIDER,
+            'size_units' => ['px', '%', 'em', 'rem'],
+            'range' => [
+                'px' => [
+                    'min' => 0,
+                    'max' => 1200,
+                ],
+            ],
+            'default' => [
+                'unit' => 'px',
+                'size' => $defaultSize,
+            ],
+            'selectors' => [
+                '{{WRAPPER}} .bs23-form' => $variable . ': {{SIZE}}{{UNIT}};',
+            ],
+        ]);
     }
 }
