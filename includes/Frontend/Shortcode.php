@@ -5,14 +5,17 @@ namespace BS23\FormBuilder\Frontend;
 
 use BS23\FormBuilder\PostTypes\FormPostType;
 use BS23\FormBuilder\Rest\FormRestController;
+use BS23\FormBuilder\Settings\FormSettings;
 
 final class Shortcode
 {
     private Renderer $renderer;
+    private FormSettings $settings;
 
-    public function __construct(Renderer $renderer)
+    public function __construct(Renderer $renderer, ?FormSettings $settings = null)
     {
         $this->renderer = $renderer;
+        $this->settings = $settings ?: new FormSettings();
     }
 
     public function register(): void
@@ -36,7 +39,7 @@ final class Shortcode
 
         $this->enqueueAssets();
 
-        return $this->renderer->render($formId, $schema);
+        return $this->renderer->render($formId, $schema, $this->settings->get($formId));
     }
 
     private function enqueueAssets(): void

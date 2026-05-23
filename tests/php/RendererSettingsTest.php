@@ -54,6 +54,51 @@ final class RendererSettingsTest extends WP_UnitTestCase
         $this->assertStringContainsString('More details', $html);
     }
 
+    public function test_renderer_outputs_frontend_style_variables(): void
+    {
+        $html = $this->renderer()->render(
+            123,
+            [
+                'version' => 1,
+                'fields' => [
+                    ['id' => 'field_1', 'type' => 'text', 'label' => 'Name', 'name' => 'name'],
+                ],
+            ],
+            [
+                'style' => [
+                    'max_width' => '900px',
+                    'field_gap' => '20px',
+                    'label_color' => '#111827',
+                    'button_background' => '#0f766e',
+                ],
+            ]
+        );
+
+        $this->assertStringContainsString('--bs23-form-max-width:900px', $html);
+        $this->assertStringContainsString('--bs23-field-gap:20px', $html);
+        $this->assertStringContainsString('--bs23-label-color:#111827', $html);
+        $this->assertStringContainsString('--bs23-button-background:#0f766e', $html);
+    }
+
+    public function test_renderer_ignores_invalid_frontend_style_values(): void
+    {
+        $html = $this->renderer()->render(
+            123,
+            ['version' => 1, 'fields' => [['id' => 'field_1', 'type' => 'text', 'label' => 'Name', 'name' => 'name']]],
+            [
+                'style' => [
+                    'max_width' => 'calc(100vw)',
+                    'button_background' => 'red;background:url(bad)',
+                    'label_color' => '#123456',
+                ],
+            ]
+        );
+
+        $this->assertStringNotContainsString('calc(100vw)', $html);
+        $this->assertStringNotContainsString('background:url', $html);
+        $this->assertStringContainsString('--bs23-label-color:#123456', $html);
+    }
+
     private function renderer(): Renderer
     {
         return new Renderer(new SubmissionHandler(new SubmissionValidator(), new EntryRepository()));

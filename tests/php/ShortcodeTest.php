@@ -5,6 +5,7 @@ namespace BS23\FormBuilder\Tests;
 
 use BS23\FormBuilder\PostTypes\FormPostType;
 use BS23\FormBuilder\Rest\FormRestController;
+use BS23\FormBuilder\Settings\FormSettings;
 use WP_UnitTestCase;
 
 final class ShortcodeTest extends WP_UnitTestCase
@@ -29,10 +30,16 @@ final class ShortcodeTest extends WP_UnitTestCase
                 ['id' => 'field_1', 'type' => 'email', 'label' => 'Email', 'name' => 'email', 'required' => true],
             ],
         ]);
+        update_post_meta($formId, FormSettings::META_KEY, [
+            'style' => [
+                'button_background' => '#0f766e',
+            ],
+        ]);
 
         $html = do_shortcode('[bs23_form id="' . $formId . '"]');
 
         $this->assertStringContainsString('bs23-form', $html);
         $this->assertStringContainsString('name="email"', $html);
+        $this->assertStringContainsString('--bs23-button-background:#0f766e', $html);
     }
 }

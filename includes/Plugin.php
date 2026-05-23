@@ -38,6 +38,6 @@ final class Plugin
         (new Menu())->register();
         (new EntriesPage())->register();
         $submissionHandler->register();
-        (new Shortcode($renderer))->register();
+        (new Shortcode($renderer, $formSettings))->register();
     }
 }

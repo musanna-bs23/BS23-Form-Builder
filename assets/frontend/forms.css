@@ -1,12 +1,34 @@
 .bs23-form {
+  --bs23-form-max-width: 760px;
+  --bs23-field-gap: 16px;
+  --bs23-label-color: #0f172a;
+  --bs23-label-size: 14px;
+  --bs23-input-background: #ffffff;
+  --bs23-input-border: #cbd5e1;
+  --bs23-input-radius: 8px;
+  --bs23-button-background: #2563eb;
+  --bs23-button-text: #ffffff;
+  --bs23-button-radius: 8px;
+  --bs23-error-color: #b42318;
+  --bs23-success-color: #027a48;
+  --bs23-step-active: #2563eb;
+
+  color: #0f172a;
   display: grid;
-  gap: 16px;
-  max-width: 760px;
+  gap: var(--bs23-field-gap);
+  max-width: var(--bs23-form-max-width);
+  width: 100%;
+}
+
+.bs23-form *,
+.bs23-form *::before,
+.bs23-form *::after {
+  box-sizing: border-box;
 }
 
 .bs23-form__row {
   display: grid;
-  gap: 16px;
+  gap: var(--bs23-field-gap);
 }
 
 .bs23-form__row--2 {
@@ -25,6 +47,7 @@
 .bs23-form__column {
   display: grid;
   gap: 8px;
+  min-width: 0;
 }
 
 .bs23-form__field[hidden],
@@ -32,11 +55,61 @@
   display: none;
 }
 
+.bs23-form__label {
+  color: var(--bs23-label-color);
+  font-size: var(--bs23-label-size);
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.bs23-form__label span {
+  color: var(--bs23-error-color);
+}
+
 .bs23-form input:not([type="checkbox"]):not([type="radio"]),
 .bs23-form textarea,
 .bs23-form select {
-  width: 100%;
+  appearance: none;
+  background: var(--bs23-input-background);
+  border: 1px solid var(--bs23-input-border);
+  border-radius: var(--bs23-input-radius);
+  color: #111827;
+  font: inherit;
+  min-height: 44px;
   max-width: 100%;
+  padding: 10px 12px;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+  width: 100%;
+}
+
+.bs23-form input[type="file"] {
+  cursor: pointer;
+  padding: 9px 12px;
+}
+
+.bs23-form textarea {
+  min-height: 118px;
+  resize: vertical;
+}
+
+.bs23-form select {
+  background-image:
+    linear-gradient(45deg, transparent 50%, #475569 50%),
+    linear-gradient(135deg, #475569 50%, transparent 50%);
+  background-position:
+    calc(100% - 17px) 18px,
+    calc(100% - 12px) 18px;
+  background-repeat: no-repeat;
+  background-size: 5px 5px;
+  padding-right: 36px;
+}
+
+.bs23-form input:not([type="checkbox"]):not([type="radio"]):focus,
+.bs23-form textarea:focus,
+.bs23-form select:focus {
+  border-color: var(--bs23-button-background);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--bs23-button-background) 18%, transparent);
+  outline: none;
 }
 
 .bs23-form__choices {
@@ -44,24 +117,107 @@
   gap: 8px;
 }
 
+.bs23-form__choices label {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  color: #1f2937;
+  display: flex;
+  gap: 10px;
+  line-height: 1.4;
+  min-height: 40px;
+  padding: 9px 11px;
+}
+
+.bs23-form__choices input {
+  accent-color: var(--bs23-button-background);
+}
+
+.bs23-form__help,
+.bs23-form__section-description {
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.45;
+  margin: 0;
+}
+
 .bs23-form__section {
+  border: 0;
+  border-top: 1px solid #e2e8f0;
+  margin: 10px 0 0;
   width: 100%;
 }
 
+.bs23-form__section-title,
+.bs23-form__step-marker {
+  color: #0f172a;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.25;
+  margin: 0;
+}
+
+.bs23-form__html {
+  color: #334155;
+  line-height: 1.6;
+}
+
 .bs23-form__error {
-  color: #b42318;
+  color: var(--bs23-error-color);
   font-size: 13px;
+  line-height: 1.4;
 }
 
 .bs23-form__field.has-error input,
 .bs23-form__field.has-error select,
 .bs23-form__field.has-error textarea {
-  border-color: #dc2626;
-  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+  border-color: var(--bs23-error-color);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--bs23-error-color) 14%, transparent);
 }
 
 .bs23-form__success {
-  color: #027a48;
+  background: #ecfdf3;
+  border: 1px solid #abefc6;
+  border-radius: 8px;
+  color: var(--bs23-success-color);
+  padding: 12px 14px;
+}
+
+.bs23-form__submit,
+.bs23-form__step-nav button {
+  align-items: center;
+  background: var(--bs23-button-background);
+  border: 1px solid var(--bs23-button-background);
+  border-radius: var(--bs23-button-radius);
+  color: var(--bs23-button-text);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-weight: 800;
+  justify-content: center;
+  min-height: 44px;
+  padding: 10px 18px;
+  text-decoration: none;
+  transition: filter 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+}
+
+.bs23-form__submit:hover,
+.bs23-form__step-nav button:hover {
+  filter: brightness(0.96);
+  transform: translateY(-1px);
+}
+
+.bs23-form__submit:focus-visible,
+.bs23-form__step-nav button:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--bs23-button-background) 22%, transparent);
+  outline: none;
+}
+
+.bs23-form__step-nav button[data-bs23-prev] {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #334155;
 }
 
 .bs23-form__steps {
@@ -74,7 +230,7 @@
 .bs23-form__steps-status {
   color: #475569;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .bs23-form__steps-list {
@@ -88,19 +244,15 @@
   border: 1px solid #cbd5e1;
   border-radius: 999px;
   color: #334155;
+  font-size: 13px;
+  font-weight: 700;
   padding: 7px 12px;
 }
 
 .bs23-form__step-indicator.is-active {
-  background: #1d4ed8;
-  border-color: #1d4ed8;
+  background: var(--bs23-step-active);
+  border-color: var(--bs23-step-active);
   color: #ffffff;
-}
-
-.bs23-form__step-marker {
-  color: #0f172a;
-  font-size: 20px;
-  font-weight: 700;
 }
 
 .bs23-form__step-nav {
@@ -109,8 +261,28 @@
   justify-content: space-between;
 }
 
+@supports not (color: color-mix(in srgb, #000 10%, transparent)) {
+  .bs23-form input:not([type="checkbox"]):not([type="radio"]):focus,
+  .bs23-form textarea:focus,
+  .bs23-form select:focus,
+  .bs23-form__submit:focus-visible,
+  .bs23-form__step-nav button:focus-visible {
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+  }
+
+  .bs23-form__field.has-error input,
+  .bs23-form__field.has-error select,
+  .bs23-form__field.has-error textarea {
+    box-shadow: 0 0 0 3px rgba(180, 35, 24, 0.14);
+  }
+}
+
 @media (max-width: 700px) {
   .bs23-form__row {
     grid-template-columns: 1fr;
+  }
+
+  .bs23-form__step-nav {
+    flex-direction: column-reverse;
   }
 }

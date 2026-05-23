@@ -18,7 +18,7 @@ final class Renderer
         $this->conditionalLogic = $conditionalLogic ?: new Evaluator();
     }
 
-    public function render(int $formId, array $schema): string
+    public function render(int $formId, array $schema, array $settings = []): string
     {
         $this->hasSubmit = false;
         $state = $this->submissions->stateFor($formId);
@@ -29,7 +29,7 @@ final class Renderer
 
         ob_start();
         ?>
-        <form class="bs23-form" method="post" data-bs23-form-id="<?php echo esc_attr((string) $formId); ?>" <?php echo $this->hasUploadFields($schema['fields'] ?? []) ? 'enctype="multipart/form-data"' : ''; ?>>
+        <form class="bs23-form" method="post" data-bs23-form-id="<?php echo esc_attr((string) $formId); ?>" <?php echo $this->styleAttr($settings); ?> <?php echo $this->hasUploadFields($schema['fields'] ?? []) ? 'enctype="multipart/form-data"' : ''; ?>>
             <script type="application/json" class="bs23-form__schema"><?php echo wp_json_encode($schema, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?></script>
             <?php wp_nonce_field($this->submissions->nonceAction($formId)); ?>
             <input type="hidden" name="bs23_form_id" value="<?php echo esc_attr((string) $formId); ?>" />
@@ -362,6 +362,49 @@ final class Renderer
         }
 
         return false;
+    }
+
+    private function styleAttr(array $settings): string
+    {
+        $style = is_array($settings['style'] ?? null) ? $settings['style'] : [];
+        if ($style === []) {
+            return '';
+        }
+
+        $lengthKeys = ['max_width', 'field_gap', 'label_size', 'input_radius', 'button_radius'];
+        $map = [
+            'max_width' => '--bs23-form-max-width',
+            'field_gap' => '--bs23-field-gap',
+            'label_color' => '--bs23-label-color',
+            'label_size' => '--bs23-label-size',
+            'input_background' => '--bs23-input-background',
+            'input_border' => '--bs23-input-border',
+            'input_radius' => '--bs23-input-radius',
+            'button_background' => '--bs23-button-background',
+            'button_text' => '--bs23-button-text',
+            'button_radius' => '--bs23-button-radius',
+            'error_color' => '--bs23-error-color',
+            'success_color' => '--bs23-success-color',
+            'step_active' => '--bs23-step-active',
+        ];
+
+        $declarations = [];
+        foreach ($map as $key => $variable) {
+            $value = trim((string) ($style[$key] ?? ''));
+            if ($value === '') {
+                continue;
+            }
+            if (in_array($key, $lengthKeys, true) && preg_match('/^(0|[1-9][0-9]*)(px|rem|em|%)$/', $value) !== 1) {
+                continue;
+            }
+            if (! in_array($key, $lengthKeys, true) && preg_match('/^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})$/', $value) !== 1) {
+                continue;
+            }
+
+            $declarations[] = $variable . ':' . $value;
+        }
+
+        return $declarations === [] ? '' : 'style="' . esc_attr(implode(';', $declarations)) . '"';
     }
 
     private function wrapField(array $field, string $content, array $state, array $classes): string
