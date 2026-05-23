@@ -27,6 +27,21 @@ final class RendererTest extends WP_UnitTestCase
         $this->assertStringContainsString('type="submit"', $html);
     }
 
+    public function test_renderer_outputs_anti_spam_hidden_fields(): void
+    {
+        $html = $this->renderer()->render(123, [
+            'version' => 1,
+            'fields' => [
+                ['id' => 'field_1', 'type' => 'text', 'label' => 'Full Name', 'name' => 'full_name'],
+            ],
+        ]);
+
+        $this->assertStringContainsString('name="bs23_hp"', $html);
+        $this->assertStringContainsString('name="bs23_rendered_at"', $html);
+        $this->assertStringContainsString('name="bs23_render_token"', $html);
+        $this->assertStringContainsString('autocomplete="off"', $html);
+    }
+
     public function test_renderer_outputs_container_and_section_break(): void
     {
         $html = $this->renderer()->render(123, [

@@ -36,6 +36,13 @@ export function defaultSettings() {
       message: 'Thanks, your submission has been received.',
       redirect_url: '',
     },
+    security: {
+      enabled: true,
+      honeypot: true,
+      minimum_time: 3,
+      rate_limit_count: 5,
+      rate_limit_window: 300,
+    },
     style: {
       max_width: '760px',
       field_gap: '16px',

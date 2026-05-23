@@ -21,6 +21,13 @@ final class FormSettings
                 'message' => __('Thanks, your submission has been received.', 'bs23-form-builder'),
                 'redirect_url' => '',
             ],
+            'security' => [
+                'enabled' => true,
+                'honeypot' => true,
+                'minimum_time' => 3,
+                'rate_limit_count' => 5,
+                'rate_limit_window' => 300,
+            ],
             'style' => [
                 'max_width' => '760px',
                 'field_gap' => '16px',
@@ -62,6 +69,7 @@ final class FormSettings
         $defaults = $this->defaults();
         $notification = is_array($settings['notification'] ?? null) ? $settings['notification'] : [];
         $confirmation = is_array($settings['confirmation'] ?? null) ? $settings['confirmation'] : [];
+        $security = is_array($settings['security'] ?? null) ? $settings['security'] : [];
         $style = is_array($settings['style'] ?? null) ? $settings['style'] : [];
         $to = sanitize_text_field((string) ($notification['to'] ?? $defaults['notification']['to']));
 
@@ -83,6 +91,13 @@ final class FormSettings
                 'message' => sanitize_textarea_field((string) ($confirmation['message'] ?? $defaults['confirmation']['message'])),
                 'redirect_url' => $redirect,
             ],
+            'security' => [
+                'enabled' => $this->boolean($security['enabled'] ?? $defaults['security']['enabled']),
+                'honeypot' => $this->boolean($security['honeypot'] ?? $defaults['security']['honeypot']),
+                'minimum_time' => $this->integerRange($security['minimum_time'] ?? $defaults['security']['minimum_time'], 1, 30, $defaults['security']['minimum_time']),
+                'rate_limit_count' => $this->integerRange($security['rate_limit_count'] ?? $defaults['security']['rate_limit_count'], 1, 100, $defaults['security']['rate_limit_count']),
+                'rate_limit_window' => $this->integerRange($security['rate_limit_window'] ?? $defaults['security']['rate_limit_window'], 60, 3600, $defaults['security']['rate_limit_window']),
+            ],
             'style' => $this->sanitizeStyle($style, $defaults['style']),
         ];
     }
@@ -99,6 +114,13 @@ final class FormSettings
     private function boolean($value): bool
     {
         return filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? false;
+    }
+
+    private function integerRange($value, int $minimum, int $maximum, int $fallback): int
+    {
+        $integer = filter_var($value, FILTER_VALIDATE_INT);
+
+        return is_int($integer) && $integer >= $minimum && $integer <= $maximum ? $integer : $fallback;
     }
 
     private function sanitizeStyle(array $style, array $defaults): array

@@ -55,6 +55,14 @@
   display: none;
 }
 
+.bs23-form__anti-spam {
+  height: 0;
+  left: -9999px;
+  overflow: hidden;
+  position: absolute;
+  width: 0;
+}
+
 .bs23-form__label {
   color: var(--bs23-label-color);
   font-size: var(--bs23-label-size);

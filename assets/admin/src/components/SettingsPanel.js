@@ -1,6 +1,7 @@
 export default function SettingsPanel({ formId, settings, status, onChange, onSave, onTest }) {
   const notification = settings.notification;
   const confirmation = settings.confirmation;
+  const security = settings.security || {};
   const style = settings.style || {};
 
   const updateNotification = (key, value) => onChange({
@@ -14,6 +15,10 @@ export default function SettingsPanel({ formId, settings, status, onChange, onSa
   const updateStyle = (key, value) => onChange({
     ...settings,
     style: { ...style, [key]: value },
+  });
+  const updateSecurity = (key, value) => onChange({
+    ...settings,
+    security: { ...security, [key]: value },
   });
 
   return (
@@ -94,6 +99,34 @@ export default function SettingsPanel({ formId, settings, status, onChange, onSa
         </label>
         <label>Step active
           <input type="color" value={style.step_active || '#2563eb'} onChange={(event) => updateStyle('step_active', event.target.value)} />
+        </label>
+      </section>
+      <section>
+        <h3>Security</h3>
+        <label className="bs23-settings-panel__toggle">
+          <input
+            type="checkbox"
+            checked={security.enabled !== false}
+            onChange={(event) => updateSecurity('enabled', event.target.checked)}
+          />
+          Enable anti-spam
+        </label>
+        <label className="bs23-settings-panel__toggle">
+          <input
+            type="checkbox"
+            checked={security.honeypot !== false}
+            onChange={(event) => updateSecurity('honeypot', event.target.checked)}
+          />
+          Honeypot field
+        </label>
+        <label>Minimum submit time
+          <input type="number" min="1" max="30" value={security.minimum_time || 3} onChange={(event) => updateSecurity('minimum_time', event.target.value)} />
+        </label>
+        <label>Rate limit count
+          <input type="number" min="1" max="100" value={security.rate_limit_count || 5} onChange={(event) => updateSecurity('rate_limit_count', event.target.value)} />
+        </label>
+        <label>Rate limit window
+          <input type="number" min="60" max="3600" value={security.rate_limit_window || 300} onChange={(event) => updateSecurity('rate_limit_window', event.target.value)} />
         </label>
       </section>
       <footer>

@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace BS23\FormBuilder\Frontend;
 
 use BS23\FormBuilder\ConditionalLogic\Evaluator;
+use BS23\FormBuilder\Security\AntiSpamGuard;
 use BS23\FormBuilder\Submission\SubmissionHandler;
 
 final class Renderer
@@ -34,6 +35,7 @@ final class Renderer
             <?php wp_nonce_field($this->submissions->nonceAction($formId)); ?>
             <input type="hidden" name="bs23_form_id" value="<?php echo esc_attr((string) $formId); ?>" />
             <input type="hidden" name="<?php echo esc_attr(SubmissionHandler::ACTION_FIELD); ?>" value="1" />
+            <?php echo $this->antiSpamMarkup($formId); ?>
             <?php echo $this->messageMarkup($state); ?>
             <?php echo $this->fieldsMarkup($schema['fields'] ?? [], $state); ?>
             <?php if (! $this->hasSubmit) : ?>
@@ -405,6 +407,21 @@ final class Renderer
         }
 
         return $declarations === [] ? '' : 'style="' . esc_attr(implode(';', $declarations)) . '"';
+    }
+
+    private function antiSpamMarkup(int $formId): string
+    {
+        $timestamp = time();
+
+        return sprintf(
+            '<div class="bs23-form__anti-spam" aria-hidden="true"><label>%s<input type="text" name="%s" value="" tabindex="-1" autocomplete="off" /></label></div><input type="hidden" name="%s" value="%s" /><input type="hidden" name="%s" value="%s" />',
+            esc_html__('Leave this field empty', 'bs23-form-builder'),
+            esc_attr(AntiSpamGuard::HONEYPOT_FIELD),
+            esc_attr(AntiSpamGuard::RENDERED_AT_FIELD),
+            esc_attr((string) $timestamp),
+            esc_attr(AntiSpamGuard::TOKEN_FIELD),
+            esc_attr(AntiSpamGuard::tokenFor($formId, $timestamp))
+        );
     }
 
     private function wrapField(array $field, string $content, array $state, array $classes): string
