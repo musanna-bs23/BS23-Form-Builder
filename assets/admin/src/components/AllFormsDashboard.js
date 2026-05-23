@@ -25,6 +25,47 @@ function formatDate(value) {
   return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
+function StatIcon({ type }) {
+  const paths = {
+    submissions: (
+      <>
+        <path d="M4 9h16" />
+        <path d="M7 9l2.2-4h5.6L17 9" />
+        <path d="M6 9v8a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V9" />
+        <path d="M9 14h6" />
+      </>
+    ),
+    month: (
+      <>
+        <path d="M7 3v4" />
+        <path d="M17 3v4" />
+        <path d="M4 8h16" />
+        <rect x="4" y="5" width="16" height="15" rx="2" />
+        <path d="M8 12h2" />
+        <path d="M12 12h2" />
+        <path d="M16 12h1" />
+        <path d="M8 16h2" />
+        <path d="M12 16h2" />
+      </>
+    ),
+    today: (
+      <>
+        <path d="M4 17l5-5 3 3 7-7" />
+        <path d="M15 8h4v4" />
+        <path d="M4 20h16" />
+      </>
+    ),
+  };
+
+  return (
+    <span className="bs23-stat-card__icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" focusable="false">
+        {paths[type]}
+      </svg>
+    </span>
+  );
+}
+
 export default function AllFormsDashboard({ forms, onDeleteForm }) {
   const [openMenu, setOpenMenu] = useState(null);
   const [query, setQuery] = useState('');
@@ -56,7 +97,7 @@ export default function AllFormsDashboard({ forms, onDeleteForm }) {
           <div className="bs23-forms-hero__title">
             <span className="bs23-forms-hero__mark" aria-hidden="true" />
             <div>
-              <span>BS23 FORMS PRO</span>
+              <span>BS23 Forms Pro</span>
               <h1>All Forms</h1>
             </div>
           </div>
@@ -70,16 +111,19 @@ export default function AllFormsDashboard({ forms, onDeleteForm }) {
       <div className="bs23-forms-dashboard">
         <section className="bs23-forms-dashboard__stats" aria-label="Forms overview">
           <article>
+            <StatIcon type="submissions" />
             <span>Total Submissions</span>
             <strong>{totalEntries.toLocaleString()}</strong>
             <small>{forms.length} forms collecting</small>
           </article>
           <article>
+            <StatIcon type="month" />
             <span>This Month</span>
             <strong>{monthEntries.toLocaleString()}</strong>
             <small>Submissions in current month</small>
           </article>
           <article>
+            <StatIcon type="today" />
             <span>Today</span>
             <strong>{todayEntries.toLocaleString()}</strong>
             <small>New submissions today</small>

@@ -731,8 +731,9 @@
   display: block;
   font-size: 12px;
   font-weight: 900;
-  letter-spacing: 4px;
+  letter-spacing: 1.4px;
   line-height: 1.1;
+  text-transform: uppercase;
 }
 
 .bs23-forms-hero__title h1 {
@@ -803,17 +804,29 @@
   position: relative;
 }
 
-.bs23-forms-dashboard__stats article::after {
+.bs23-stat-card__icon {
+  align-items: center;
   background: var(--bs23-primary);
   border-radius: 8px;
   box-shadow: 0 8px 18px rgba(73, 146, 193, 0.28);
-  content: "";
+  color: #ffffff;
+  display: inline-flex;
   height: 41px;
-  opacity: 0.95;
+  justify-content: center;
   position: absolute;
   right: 19px;
   top: 19px;
   width: 41px;
+}
+
+.bs23-stat-card__icon svg {
+  fill: none;
+  height: 22px;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+  width: 22px;
 }
 
 .bs23-forms-dashboard__stats span,
@@ -821,7 +834,7 @@
   color: var(--bs23-primary);
   font-size: 12px;
   font-weight: 900;
-  letter-spacing: 2px;
+  letter-spacing: 1.6px;
   text-transform: uppercase;
 }
 
