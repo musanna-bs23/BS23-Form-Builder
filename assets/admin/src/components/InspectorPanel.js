@@ -17,6 +17,7 @@ export default function InspectorPanel({
   field,
   fields,
   formId,
+  initialTab = 'fields',
   onAddField,
   onChangeSettings,
   onDelete,
@@ -29,7 +30,7 @@ export default function InspectorPanel({
   settings,
   settingsStatus,
 }) {
-  const [activeTab, setActiveTab] = useState('fields');
+  const [activeTab, setActiveTab] = useState(initialTab);
 
   return (
     <aside className="bs23-inspector" aria-label="Builder inspector">

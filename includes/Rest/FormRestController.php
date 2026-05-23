@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace BS23\FormBuilder\Rest;
 
 use BS23\FormBuilder\Builder\SchemaValidator;
+use BS23\FormBuilder\Install\Installer;
 use BS23\FormBuilder\PostTypes\FormPostType;
 use InvalidArgumentException;
 use WP_Error;
@@ -53,6 +54,11 @@ final class FormRestController
                 'callback' => [$this, 'updateForm'],
                 'permission_callback' => [$this, 'canManageForms'],
             ],
+            [
+                'methods' => 'DELETE',
+                'callback' => [$this, 'deleteForm'],
+                'permission_callback' => [$this, 'canManageForms'],
+            ],
         ]);
     }
 
@@ -65,7 +71,7 @@ final class FormRestController
     {
         $forms = get_posts([
             'post_type' => FormPostType::NAME,
-            'post_status' => 'publish',
+            'post_status' => ['publish', 'draft'],
             'posts_per_page' => 100,
             'orderby' => 'date',
             'order' => 'DESC',
@@ -170,6 +176,33 @@ final class FormRestController
     }
 
     /**
+     * @return WP_REST_Response|WP_Error
+     */
+    public function deleteForm(WP_REST_Request $request)
+    {
+        $form = $this->getFormPost((int) $request['id']);
+
+        if (is_wp_error($form)) {
+            return $form;
+        }
+
+        $deleted = wp_delete_post((int) $form->ID, true);
+
+        if (! $deleted) {
+            return new WP_Error(
+                'bs23_form_delete_failed',
+                __('Unable to delete form.', 'bs23-form-builder'),
+                ['status' => 500]
+            );
+        }
+
+        return new WP_REST_Response([
+            'deleted' => true,
+            'id' => (int) $form->ID,
+        ], 200);
+    }
+
+    /**
      * @param mixed $schema
      *
      * @return array|WP_Error
@@ -255,8 +288,31 @@ final class FormRestController
             'id' => $formId,
             'title' => get_the_title($formId),
             'field_count' => $this->fieldCount($fields),
+            'entries_count' => $this->entriesCount($formId),
+            'entries_this_month' => $this->entriesCount($formId, gmdate('Y-m-01 00:00:00')),
+            'entries_today' => $this->entriesCount($formId, gmdate('Y-m-d 00:00:00')),
+            'shortcode' => sprintf('[bs23_form id="%d"]', $formId),
+            'status' => get_post_status($formId),
+            'created_at' => get_post_time('c', false, $formId),
             'updated_at' => get_post_modified_time('c', false, $formId),
         ];
+    }
+
+    private function entriesCount(int $formId, string $since = ''): int
+    {
+        global $wpdb;
+
+        $table = Installer::entriesTableName();
+
+        if ($since !== '') {
+            return (int) $wpdb->get_var($wpdb->prepare(
+                "SELECT COUNT(*) FROM {$table} WHERE form_id = %d AND created_at >= %s",
+                $formId,
+                $since
+            ));
+        }
+
+        return (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$table} WHERE form_id = %d", $formId));
     }
 
     private function fieldCount(array $fields): int
