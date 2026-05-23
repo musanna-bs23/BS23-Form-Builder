@@ -1,4 +1,6 @@
-import { useMemo, useState } from '@wordpress/element';
+import { useEffect, useMemo, useState } from '@wordpress/element';
+
+const FORMS_PER_PAGE = 10;
 
 function adminPageUrl(page, params = {}) {
   const base = window.bs23FormBuilder?.adminUrl || 'admin.php';
@@ -70,6 +72,7 @@ export default function AllFormsDashboard({ forms, onDeleteForm }) {
   const [openMenu, setOpenMenu] = useState(null);
   const [query, setQuery] = useState('');
   const [dateFilter, setDateFilter] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
   const filteredForms = useMemo(() => {
     const needle = query.trim().toLowerCase();
     return forms.filter((form) => {
@@ -86,9 +89,21 @@ export default function AllFormsDashboard({ forms, onDeleteForm }) {
       return true;
     });
   }, [forms, query, dateFilter]);
+  const totalPages = Math.ceil(filteredForms.length / FORMS_PER_PAGE);
+  const visibleForms = filteredForms.slice((currentPage - 1) * FORMS_PER_PAGE, currentPage * FORMS_PER_PAGE);
   const totalEntries = forms.reduce((sum, form) => sum + Number(form.entries_count || 0), 0);
   const monthEntries = forms.reduce((sum, form) => sum + Number(form.entries_this_month || 0), 0);
   const todayEntries = forms.reduce((sum, form) => sum + Number(form.entries_today || 0), 0);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [query, dateFilter]);
+
+  useEffect(() => {
+    if (totalPages > 0 && currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
 
   const actionLinks = (form) => [
     ['Edit', adminPageUrl('bs23-form-builder-add-new', { form_id: form.id })],
@@ -109,7 +124,6 @@ export default function AllFormsDashboard({ forms, onDeleteForm }) {
             </div>
           </div>
           <div className="bs23-forms-hero__actions">
-            <a className="bs23-forms-hero__templates" href={adminPageUrl('bs23-form-builder-templates')}>Templates</a>
             <a className="bs23-forms-hero__add" href={adminPageUrl('bs23-form-builder-add-new')}>Add New Form</a>
           </div>
         </div>
@@ -154,7 +168,6 @@ export default function AllFormsDashboard({ forms, onDeleteForm }) {
               value={query}
             />
           </label>
-          <a className="bs23-forms-dashboard__export" href={adminPageUrl('bs23-form-builder-entries')}>Export</a>
         </section>
 
         <section className="bs23-forms-table" aria-label="All forms">
@@ -167,7 +180,7 @@ export default function AllFormsDashboard({ forms, onDeleteForm }) {
           </header>
           {filteredForms.length === 0 ? (
             <div className="bs23-forms-table__empty">No forms found.</div>
-          ) : filteredForms.map((form) => (
+          ) : visibleForms.map((form) => (
             <article className="bs23-forms-table__row" key={form.id}>
               <strong className="bs23-forms-table__id">#{form.id}</strong>
               <div className="bs23-forms-table__title">
@@ -202,15 +215,27 @@ export default function AllFormsDashboard({ forms, onDeleteForm }) {
               </div>
             </article>
           ))}
-          <footer className="bs23-forms-table__footer">
-            <span>Showing <strong>1-{filteredForms.length}</strong> of <strong>{forms.length}</strong> forms</span>
-            <div>
-              <button type="button" disabled>Prev</button>
-              <button className="is-active" type="button">1</button>
-              <button type="button">2</button>
-              <button type="button">Next</button>
-            </div>
-          </footer>
+          {totalPages > 1 && (
+            <footer className="bs23-forms-table__footer">
+              <span>
+                Showing <strong>{((currentPage - 1) * FORMS_PER_PAGE) + 1}-{Math.min(currentPage * FORMS_PER_PAGE, filteredForms.length)}</strong> of <strong>{filteredForms.length}</strong> forms
+              </span>
+              <div>
+                <button disabled={currentPage === 1} onClick={() => setCurrentPage((page) => Math.max(1, page - 1))} type="button">Prev</button>
+                {Array.from({ length: totalPages }, (_, index) => (
+                  <button
+                    className={currentPage === index + 1 ? 'is-active' : ''}
+                    key={index + 1}
+                    onClick={() => setCurrentPage(index + 1)}
+                    type="button"
+                  >
+                    {index + 1}
+                  </button>
+                ))}
+                <button disabled={currentPage === totalPages} onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))} type="button">Next</button>
+              </div>
+            </footer>
+          )}
         </section>
       </div>
     </main>

@@ -121,6 +121,9 @@ test('all forms screen shows dashboard table with form actions', async () => {
   expect(screen.getAllByText('248').length).toBeGreaterThan(0);
   expect(screen.getByText('Contact Form')).not.toBeNull();
   expect(screen.getByText('[bs23_form id="7"]')).not.toBeNull();
+  expect(screen.queryByText('Templates')).toBeNull();
+  expect(screen.queryByText('Export')).toBeNull();
+  expect(screen.queryByRole('button', { name: 'Next' })).toBeNull();
 
   fireEvent.click(screen.getAllByRole('button', { name: 'Actions' })[0]);
 
@@ -143,6 +146,36 @@ test('all forms date filters update visible rows and active state', async () => 
   expect(screen.getByText('Contact Form')).not.toBeNull();
   expect(screen.queryByText('Quote Form')).toBeNull();
   expect(screen.getAllByRole('button', { name: 'Today' })[0].className).toContain('is-active');
+});
+
+test('all forms paginates only when more than ten rows are visible', async () => {
+  window.bs23FormBuilder.page = 'all_forms';
+  apiFetch.mockImplementation((request) => {
+    if (request.path === '/bs23-form-builder/v1/forms') {
+      return Promise.resolve(Array.from({ length: 11 }, (_, index) => ({
+        id: index + 1,
+        title: `Form ${index + 1}`,
+        entries_count: 0,
+        entries_this_month: 0,
+        entries_today: 0,
+        status: 'publish',
+        shortcode: `[bs23_form id="${index + 1}"]`,
+        created_at: '2026-05-01T00:00:00+00:00',
+      })));
+    }
+    return Promise.resolve({});
+  });
+
+  render(<App />);
+
+  await waitFor(() => expect(screen.getByText('Form 1')).not.toBeNull());
+
+  expect(screen.queryByText('Form 11')).toBeNull();
+
+  fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+
+  expect(screen.getByText('Form 11')).not.toBeNull();
+  expect(screen.queryByText('Form 1')).toBeNull();
 });
 
 test('organizes builder tools into inspector tabs', async () => {
