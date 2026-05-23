@@ -123,6 +123,9 @@ final class SubmissionValidator
         if (in_array($type, ['file_upload', 'image_upload'], true)) {
             return is_array($value) ? [
                 'name' => sanitize_file_name((string) ($value['name'] ?? '')),
+                'type' => sanitize_text_field((string) ($value['type'] ?? '')),
+                'tmp_name' => sanitize_text_field((string) ($value['tmp_name'] ?? '')),
+                'error' => isset($value['error']) && is_numeric($value['error']) ? (int) $value['error'] : UPLOAD_ERR_NO_FILE,
                 'size' => isset($value['size']) && is_numeric($value['size']) ? (int) $value['size'] : 0,
             ] : ['name' => '', 'size' => 0];
         }

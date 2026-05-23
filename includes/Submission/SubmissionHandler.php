@@ -15,14 +15,16 @@ final class SubmissionHandler
 
     private SubmissionValidator $validator;
     private EntryRepository $entries;
+    private UploadStorage $uploads;
     private FormSettings $settings;
     private Mailer $mailer;
     private array $states = [];
 
-    public function __construct(SubmissionValidator $validator, EntryRepository $entries, ?FormSettings $settings = null, ?Mailer $mailer = null)
+    public function __construct(SubmissionValidator $validator, EntryRepository $entries, ?FormSettings $settings = null, ?Mailer $mailer = null, ?UploadStorage $uploads = null)
     {
         $this->validator = $validator;
         $this->entries = $entries;
+        $this->uploads = $uploads ?: new UploadStorage();
         $this->settings = $settings ?: new FormSettings();
         $this->mailer = $mailer ?: new Mailer($this->settings, new \BS23\FormBuilder\Notifications\TemplateRenderer());
     }
@@ -48,7 +50,7 @@ final class SubmissionHandler
         }
 
         $formId = isset($_POST['bs23_form_id']) ? absint(wp_unslash($_POST['bs23_form_id'])) : 0;
-        $posted = wp_unslash($_POST);
+        $posted = array_merge(wp_unslash($_POST), $this->uploadedFiles());
 
         $this->states[$formId] = [
             'success' => '',
@@ -79,14 +81,15 @@ final class SubmissionHandler
             return;
         }
 
-        $entryId = $this->entries->insert($formId, $result['data']);
+        $entryData = $this->uploads->storeUploads($formId, $schema, $result['data']);
+        $entryId = $this->entries->insert($formId, $entryData);
         if ($entryId < 1) {
             $this->states[$formId]['errors']['form'] = __('Could not save your submission.', 'bs23-form-builder');
             return;
         }
 
         $settings = $this->settings->get($formId);
-        $this->mailer->send($formId, $entryId, $result['data'], $settings);
+        $this->mailer->send($formId, $entryId, $entryData, $settings);
 
         $this->states[$formId] = [
             'success' => (string) ($settings['confirmation']['message'] ?? __('Thanks, your submission has been received.', 'bs23-form-builder')),
@@ -103,5 +106,17 @@ final class SubmissionHandler
     public function nonceAction(int $formId): string
     {
         return 'bs23_form_submit_' . $formId;
+    }
+
+    private function uploadedFiles(): array
+    {
+        $files = [];
+        foreach ($_FILES as $name => $file) {
+            if (is_array($file)) {
+                $files[sanitize_key((string) $name)] = $file;
+            }
+        }
+
+        return $files;
     }
 }

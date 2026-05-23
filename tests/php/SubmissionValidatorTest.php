@@ -170,6 +170,30 @@ final class SubmissionValidatorTest extends WP_UnitTestCase
         $this->assertStringContainsString('allowed file type', $result['errors']['resume']);
     }
 
+    public function test_valid_upload_metadata_is_accepted(): void
+    {
+        $schema = [
+            'version' => 1,
+            'fields' => [
+                [
+                    'id' => 'field_1',
+                    'type' => 'file_upload',
+                    'label' => 'Resume',
+                    'name' => 'resume',
+                    'required' => true,
+                    'settings' => ['validation' => ['allowedExtensions' => 'pdf', 'maxFileSizeMb' => '2']],
+                ],
+            ],
+        ];
+
+        $result = (new SubmissionValidator())->validate($schema, [
+            'resume' => ['name' => 'resume.pdf', 'type' => 'application/pdf', 'size' => 1024, 'error' => UPLOAD_ERR_OK],
+        ]);
+
+        $this->assertTrue($result['valid']);
+        $this->assertSame('resume.pdf', $result['data']['resume']['name']);
+    }
+
     public function test_custom_validation_rule_string_is_enforced(): void
     {
         $schema = [

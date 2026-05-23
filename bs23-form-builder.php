@@ -27,6 +27,7 @@ require_once BS23_FORM_BUILDER_DIR . 'includes/Admin/Menu.php';
 require_once BS23_FORM_BUILDER_DIR . 'includes/Install/Installer.php';
 require_once BS23_FORM_BUILDER_DIR . 'includes/Validation/SubmissionValidator.php';
 require_once BS23_FORM_BUILDER_DIR . 'includes/Submission/EntryRepository.php';
+require_once BS23_FORM_BUILDER_DIR . 'includes/Submission/UploadStorage.php';
 require_once BS23_FORM_BUILDER_DIR . 'includes/Submission/SubmissionHandler.php';
 require_once BS23_FORM_BUILDER_DIR . 'includes/Frontend/Renderer.php';
 require_once BS23_FORM_BUILDER_DIR . 'includes/Frontend/Shortcode.php';
