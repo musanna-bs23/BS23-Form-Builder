@@ -1,6 +1,6 @@
 import { FIELD_GROUPS } from '../fields';
 
-export default function Palette() {
+export default function Palette({ onAddField = () => {} }) {
   const handleDragStart = (event, type) => {
     event.dataTransfer.setData('text/plain', type);
   };
@@ -16,6 +16,7 @@ export default function Palette() {
                 className="bs23-palette-item"
                 draggable
                 key={type}
+                onDoubleClick={() => onAddField(type)}
                 onDragStart={(event) => handleDragStart(event, type)}
                 type="button"
               >

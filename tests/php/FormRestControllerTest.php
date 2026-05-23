@@ -122,6 +122,35 @@ final class FormRestControllerTest extends WP_UnitTestCase
         $this->assertSame('email', $data['schema']['fields'][0]['type']);
     }
 
+    public function test_list_returns_saved_forms_for_builder_sidebar(): void
+    {
+        wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
+        do_action('init');
+        do_action('rest_api_init');
+
+        $contactId = $this->createFormPost('Contact Form', [
+            'version' => 1,
+            'fields' => [
+                ['id' => 'field_1', 'type' => 'email', 'label' => 'Email', 'name' => 'email'],
+                ['id' => 'field_2', 'type' => 'text', 'label' => 'Name', 'name' => 'name'],
+            ],
+        ]);
+        $quoteId = $this->createFormPost('Quote Form', [
+            'version' => 1,
+            'fields' => [],
+        ]);
+
+        $request = new WP_REST_Request('GET', '/bs23-form-builder/v1/forms');
+        $response = rest_do_request($request);
+        $data = $response->get_data();
+
+        $this->assertSame(200, $response->get_status());
+        $this->assertSame([$quoteId, $contactId], array_column($data, 'id'));
+        $this->assertSame('Quote Form', $data[0]['title']);
+        $this->assertSame(0, $data[0]['field_count']);
+        $this->assertSame(2, $data[1]['field_count']);
+    }
+
     public function test_put_updates_title_and_schema(): void
     {
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));

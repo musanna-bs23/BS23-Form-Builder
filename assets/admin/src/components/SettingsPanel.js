@@ -1,4 +1,4 @@
-export default function SettingsPanel({ formId, settings, status, onChange, onSave, onTest }) {
+export default function SettingsPanel({ formId, mode = 'all', settings, status, onChange, onSave, onTest }) {
   const notification = settings.notification;
   const confirmation = settings.confirmation;
   const security = settings.security || {};
@@ -21,12 +21,19 @@ export default function SettingsPanel({ formId, settings, status, onChange, onSa
     security: { ...security, [key]: value },
   });
 
+  const showForm = mode === 'all' || mode === 'form';
+  const showEmail = mode === 'all' || mode === 'email';
+  const showStyle = mode === 'all' || mode === 'style';
+  const showSecurity = mode === 'all' || mode === 'security';
+  const showActions = mode === 'all' || mode === 'email';
+
   return (
-    <aside className="bs23-settings-panel">
+    <aside className={`bs23-settings-panel bs23-settings-panel--${mode}`}>
       <header>
         <h2>Form Settings</h2>
         <span>{status}</span>
       </header>
+      {showEmail && (
       <section>
         <h3>Email notification</h3>
         <label className="bs23-settings-panel__toggle">
@@ -50,6 +57,8 @@ export default function SettingsPanel({ formId, settings, status, onChange, onSa
           <input value={notification.reply_to} placeholder="email" onChange={(event) => updateNotification('reply_to', event.target.value)} />
         </label>
       </section>
+      )}
+      {showForm && (
       <section>
         <h3>Confirmation</h3>
         <label>Success message
@@ -59,6 +68,8 @@ export default function SettingsPanel({ formId, settings, status, onChange, onSa
           <input value={confirmation.redirect_url} onChange={(event) => updateConfirmation('redirect_url', event.target.value)} />
         </label>
       </section>
+      )}
+      {showStyle && (
       <section>
         <h3>Style</h3>
         <label>Form width
@@ -101,6 +112,8 @@ export default function SettingsPanel({ formId, settings, status, onChange, onSa
           <input type="color" value={style.step_active || '#2563eb'} onChange={(event) => updateStyle('step_active', event.target.value)} />
         </label>
       </section>
+      )}
+      {showSecurity && (
       <section>
         <h3>Security</h3>
         <label className="bs23-settings-panel__toggle">
@@ -129,10 +142,13 @@ export default function SettingsPanel({ formId, settings, status, onChange, onSa
           <input type="number" min="60" max="3600" value={security.rate_limit_window || 300} onChange={(event) => updateSecurity('rate_limit_window', event.target.value)} />
         </label>
       </section>
+      )}
+      {showActions && (
       <footer>
         <button type="button" className="button button-primary" disabled={!formId} onClick={onSave}>Save Settings</button>
         <button type="button" className="button" disabled={!formId} onClick={onTest}>Send Test</button>
       </footer>
+      )}
     </aside>
   );
 }

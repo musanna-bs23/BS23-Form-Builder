@@ -31,6 +31,11 @@ final class FormRestController
     {
         register_rest_route(self::NAMESPACE, '/forms', [
             [
+                'methods' => 'GET',
+                'callback' => [$this, 'listForms'],
+                'permission_callback' => [$this, 'canManageForms'],
+            ],
+            [
                 'methods' => 'POST',
                 'callback' => [$this, 'createForm'],
                 'permission_callback' => [$this, 'canManageForms'],
@@ -54,6 +59,23 @@ final class FormRestController
     public function canManageForms(): bool
     {
         return current_user_can('manage_options');
+    }
+
+    public function listForms(): WP_REST_Response
+    {
+        $forms = get_posts([
+            'post_type' => FormPostType::NAME,
+            'post_status' => 'publish',
+            'posts_per_page' => 100,
+            'orderby' => 'date',
+            'order' => 'DESC',
+            'no_found_rows' => true,
+        ]);
+
+        return new WP_REST_Response(array_map(
+            fn ($form): array => $this->prepareFormListItem((int) $form->ID),
+            $forms
+        ), 200);
     }
 
     /**
@@ -222,5 +244,37 @@ final class FormRestController
             'title' => get_the_title($formId),
             'schema' => get_post_meta($formId, self::META_KEY, true),
         ];
+    }
+
+    private function prepareFormListItem(int $formId): array
+    {
+        $schema = get_post_meta($formId, self::META_KEY, true);
+        $fields = is_array($schema['fields'] ?? null) ? $schema['fields'] : [];
+
+        return [
+            'id' => $formId,
+            'title' => get_the_title($formId),
+            'field_count' => $this->fieldCount($fields),
+            'updated_at' => get_post_modified_time('c', false, $formId),
+        ];
+    }
+
+    private function fieldCount(array $fields): int
+    {
+        $count = 0;
+        foreach ($fields as $field) {
+            if (! is_array($field)) {
+                continue;
+            }
+            if (($field['type'] ?? '') === 'container') {
+                foreach (($field['children'] ?? []) as $column) {
+                    $count += is_array($column) ? $this->fieldCount($column) : 0;
+                }
+                continue;
+            }
+            $count++;
+        }
+
+        return $count;
     }
 }
