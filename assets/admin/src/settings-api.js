@@ -36,5 +36,20 @@ export function defaultSettings() {
       message: 'Thanks, your submission has been received.',
       redirect_url: '',
     },
+    style: {
+      max_width: '760px',
+      field_gap: '16px',
+      label_color: '#0f172a',
+      label_size: '14px',
+      input_background: '#ffffff',
+      input_border: '#cbd5e1',
+      input_radius: '8px',
+      button_background: '#2563eb',
+      button_text: '#ffffff',
+      button_radius: '8px',
+      error_color: '#b42318',
+      success_color: '#027a48',
+      step_active: '#2563eb',
+    },
   };
 }
