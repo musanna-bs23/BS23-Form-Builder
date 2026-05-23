@@ -1,0 +1,245 @@
+<?php
+declare(strict_types=1);
+
+namespace BS23\FormBuilder\Builder;
+
+use InvalidArgumentException;
+
+final class SchemaValidator
+{
+    private const CONDITIONAL_OPERATORS = ['equals', 'not_equals', 'contains', 'is_empty', 'is_not_empty'];
+
+    private const FIELD_TYPES = [
+        'name', 'email', 'text', 'mask', 'textarea', 'address', 'country', 'number',
+        'dropdown', 'radio', 'checkbox', 'multiple_choice', 'url', 'datetime',
+        'image_upload', 'file_upload', 'html', 'phone', 'hidden', 'section_break',
+        'shortcode', 'terms', 'action_hook', 'form_step', 'ratings', 'checkable_grid',
+        'gdpr', 'password', 'submit', 'range', 'nps', 'dynamic', 'chained_select',
+        'color', 'repeat', 'post_select', 'rich_text', 'save_resume', 'container',
+    ];
+
+    public function sanitize(array $schema): array
+    {
+        $version = isset($schema['version']) ? $this->parseInteger($schema['version']) : 1;
+
+        if ($version !== 1) {
+            throw new InvalidArgumentException('Unsupported schema version.');
+        }
+
+        $fields = $schema['fields'] ?? [];
+
+        if (! is_array($fields)) {
+            throw new InvalidArgumentException('Schema fields must be an array.');
+        }
+
+        return [
+            'version' => 1,
+            'fields' => $this->sanitizeFields($fields),
+        ];
+    }
+
+    private function sanitizeFields(array $fields): array
+    {
+        $sanitized = [];
+
+        foreach ($fields as $field) {
+            if (! is_array($field)) {
+                throw new InvalidArgumentException('Field must be an object.');
+            }
+
+            $sanitized[] = $this->sanitizeField($field);
+        }
+
+        return $sanitized;
+    }
+
+    private function sanitizeField(array $field): array
+    {
+        $type = $this->sanitizeType($field['type'] ?? '');
+
+        if ($type === 'container') {
+            return $this->sanitizeContainer($field);
+        }
+
+        return [
+            'id' => $this->sanitizeId($field['id'] ?? null, 'field_'),
+            'type' => $type,
+            'label' => sanitize_text_field((string) ($field['label'] ?? 'Field')),
+            'name' => sanitize_key(str_replace(' ', '_', (string) ($field['name'] ?? $type))),
+            'required' => $this->sanitizeRequired($field['required'] ?? false),
+            'settings' => is_array($field['settings'] ?? null) ? $this->sanitizeSettings($field['settings']) : [],
+        ];
+    }
+
+    private function sanitizeContainer(array $field): array
+    {
+        $columns = $this->parseInteger($field['columns'] ?? null);
+
+        if (! in_array($columns, [1, 2, 3, 4], true)) {
+            throw new InvalidArgumentException('Invalid container column count.');
+        }
+
+        $children = $field['children'] ?? [];
+
+        if (! is_array($children) || count($children) !== $columns) {
+            throw new InvalidArgumentException('Container children must match column count.');
+        }
+
+        $sanitizedChildren = [];
+        foreach ($children as $column) {
+            if (! is_array($column)) {
+                throw new InvalidArgumentException('Container column must be an array.');
+            }
+            $sanitizedChildren[] = $this->sanitizeFields($column);
+        }
+
+        return [
+            'id' => $this->sanitizeId($field['id'] ?? null, 'container_'),
+            'type' => 'container',
+            'columns' => $columns,
+            'children' => $sanitizedChildren,
+        ];
+    }
+
+    private function sanitizeSettings(array $settings): array
+    {
+        $sanitized = [];
+
+        foreach ($settings as $key => $value) {
+            $safeKey = sanitize_key(str_replace(' ', '_', (string) $key));
+            if ($safeKey === 'conditionallogic' || $safeKey === 'conditionalLogic') {
+                if (is_array($value)) {
+                    $sanitized['conditionalLogic'] = $this->sanitizeConditionalLogic($value);
+                }
+                continue;
+            }
+            if ($safeKey === 'validation') {
+                if (is_array($value)) {
+                    $sanitized['validation'] = $this->sanitizeValidation($value);
+                }
+                continue;
+            }
+            if (is_scalar($value)) {
+                $sanitized[$safeKey] = sanitize_text_field((string) $value);
+            }
+        }
+
+        return $sanitized;
+    }
+
+    private function sanitizeConditionalLogic(array $logic): array
+    {
+        $rules = [];
+        $rawRules = is_array($logic['rules'] ?? null) ? $logic['rules'] : [];
+
+        foreach ($rawRules as $rule) {
+            if (! is_array($rule)) {
+                continue;
+            }
+
+            $field = sanitize_key((string) ($rule['field'] ?? ''));
+            $operator = sanitize_key((string) ($rule['operator'] ?? ''));
+            if ($field === '' || ! in_array($operator, self::CONDITIONAL_OPERATORS, true)) {
+                continue;
+            }
+
+            $rules[] = [
+                'field' => $field,
+                'operator' => $operator,
+                'value' => is_scalar($rule['value'] ?? '') ? sanitize_text_field((string) $rule['value']) : '',
+            ];
+        }
+
+        return [
+            'enabled' => $this->sanitizeRequired($logic['enabled'] ?? false),
+            'action' => ($logic['action'] ?? 'show') === 'hide' ? 'hide' : 'show',
+            'match' => ($logic['match'] ?? 'all') === 'any' ? 'any' : 'all',
+            'rules' => $rules,
+        ];
+    }
+
+    private function sanitizeValidation(array $validation): array
+    {
+        $sanitized = [];
+
+        foreach (['minLength', 'maxLength'] as $key) {
+            if (isset($validation[$key]) && preg_match('/^(0|[1-9][0-9]*)$/', (string) $validation[$key]) === 1) {
+                $sanitized[$key] = (string) $validation[$key];
+            }
+        }
+
+        foreach (['minValue', 'maxValue', 'maxFileSizeMb'] as $key) {
+            if (isset($validation[$key]) && preg_match('/^-?(0|[1-9][0-9]*)(\.[0-9]+)?$/', (string) $validation[$key]) === 1) {
+                $sanitized[$key] = (string) $validation[$key];
+            }
+        }
+
+        foreach (['pattern', 'patternMessage'] as $key) {
+            if (isset($validation[$key]) && is_scalar($validation[$key])) {
+                $sanitized[$key] = sanitize_text_field((string) $validation[$key]);
+            }
+        }
+
+        if (isset($validation['allowedExtensions']) && is_scalar($validation['allowedExtensions'])) {
+            $extensions = array_filter(array_map(
+                static fn (string $extension): string => sanitize_key(ltrim(trim(strtolower($extension)), '.')),
+                preg_split('/[\s,]+/', (string) $validation['allowedExtensions']) ?: []
+            ));
+            if ($extensions !== []) {
+                $sanitized['allowedExtensions'] = implode(',', array_values(array_unique($extensions)));
+            }
+        }
+
+        if (isset($validation['rules']) && is_scalar($validation['rules'])) {
+            $rules = trim(sanitize_text_field((string) $validation['rules']));
+            if ($rules !== '') {
+                $sanitized['rules'] = $rules;
+            }
+        }
+
+        return $sanitized;
+    }
+
+    private function parseInteger($value): ?int
+    {
+        if (is_int($value)) {
+            return $value;
+        }
+
+        if (is_string($value) && preg_match('/^(0|[1-9][0-9]*)$/', $value) === 1) {
+            return (int) $value;
+        }
+
+        return null;
+    }
+
+    private function sanitizeType($type): string
+    {
+        $rawType = is_scalar($type) ? (string) $type : '';
+        $sanitizedType = sanitize_key($rawType);
+
+        if ($rawType !== $sanitizedType || ! in_array($rawType, self::FIELD_TYPES, true)) {
+            throw new InvalidArgumentException(sprintf('Invalid field type: %s', $rawType));
+        }
+
+        return $rawType;
+    }
+
+    private function sanitizeId($id, string $prefix): string
+    {
+        $sanitizedId = is_scalar($id) ? sanitize_key((string) $id) : '';
+
+        if ($sanitizedId === '') {
+            $sanitizedId = sanitize_key(wp_unique_id($prefix));
+        }
+
+        return $sanitizedId;
+    }
+
+    private function sanitizeRequired($required): bool
+    {
+        $sanitized = filter_var($required, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+
+        return $sanitized ?? false;
+    }
+}
