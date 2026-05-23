@@ -7,6 +7,7 @@ test('settings panel renders notification and confirmation controls', () => {
 
   expect(screen.getByText('Email notification')).not.toBeNull();
   expect(screen.getByText('Confirmation')).not.toBeNull();
+  expect(screen.getByText('Security')).not.toBeNull();
 });
 
 test('settings panel emits changed notification payload', () => {
@@ -41,5 +42,24 @@ test('settings panel emits changed style payload', () => {
   }));
   expect(onChange).toHaveBeenCalledWith(expect.objectContaining({
     style: expect.objectContaining({ button_background: '#111827' }),
+  }));
+});
+
+test('settings panel emits changed security payload', () => {
+  const onChange = jest.fn();
+  render(<SettingsPanel formId={1} settings={defaultSettings()} status="" onChange={onChange} onSave={() => {}} onTest={() => {}} />);
+
+  fireEvent.click(screen.getByLabelText('Enable anti-spam'));
+  fireEvent.change(screen.getByLabelText('Minimum submit time'), { target: { value: '5' } });
+  fireEvent.change(screen.getByLabelText('Rate limit count'), { target: { value: '8' } });
+
+  expect(onChange).toHaveBeenCalledWith(expect.objectContaining({
+    security: expect.objectContaining({ enabled: false }),
+  }));
+  expect(onChange).toHaveBeenCalledWith(expect.objectContaining({
+    security: expect.objectContaining({ minimum_time: '5' }),
+  }));
+  expect(onChange).toHaveBeenCalledWith(expect.objectContaining({
+    security: expect.objectContaining({ rate_limit_count: '8' }),
   }));
 });
