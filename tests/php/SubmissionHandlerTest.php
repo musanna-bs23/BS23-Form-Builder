@@ -6,6 +6,7 @@ namespace BS23\FormBuilder\Tests;
 use BS23\FormBuilder\Install\Installer;
 use BS23\FormBuilder\PostTypes\FormPostType;
 use BS23\FormBuilder\Rest\FormRestController;
+use BS23\FormBuilder\Security\AntiSpamGuard;
 use WP_UnitTestCase;
 
 final class SubmissionHandlerTest extends WP_UnitTestCase
@@ -36,10 +37,14 @@ final class SubmissionHandlerTest extends WP_UnitTestCase
 
         $formId = $this->createForm();
         $_SERVER['REQUEST_METHOD'] = 'POST';
+        $timestamp = time() - 10;
         $_POST = [
             'bs23_form_submit' => '1',
             'bs23_form_id' => (string) $formId,
             '_wpnonce' => wp_create_nonce('bs23_form_submit_' . $formId),
+            AntiSpamGuard::RENDERED_AT_FIELD => (string) $timestamp,
+            AntiSpamGuard::TOKEN_FIELD => AntiSpamGuard::tokenFor($formId, $timestamp),
+            AntiSpamGuard::HONEYPOT_FIELD => '',
             'email' => 'person@example.com',
         ];
 

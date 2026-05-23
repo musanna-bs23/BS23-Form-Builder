@@ -6,6 +6,7 @@ namespace BS23\FormBuilder\Submission;
 use BS23\FormBuilder\PostTypes\FormPostType;
 use BS23\FormBuilder\Rest\FormRestController;
 use BS23\FormBuilder\Notifications\Mailer;
+use BS23\FormBuilder\Security\AntiSpamGuard;
 use BS23\FormBuilder\Settings\FormSettings;
 use BS23\FormBuilder\Validation\SubmissionValidator;
 
@@ -18,15 +19,17 @@ final class SubmissionHandler
     private UploadStorage $uploads;
     private FormSettings $settings;
     private Mailer $mailer;
+    private AntiSpamGuard $antiSpam;
     private array $states = [];
 
-    public function __construct(SubmissionValidator $validator, EntryRepository $entries, ?FormSettings $settings = null, ?Mailer $mailer = null, ?UploadStorage $uploads = null)
+    public function __construct(SubmissionValidator $validator, EntryRepository $entries, ?FormSettings $settings = null, ?Mailer $mailer = null, ?UploadStorage $uploads = null, ?AntiSpamGuard $antiSpam = null)
     {
         $this->validator = $validator;
         $this->entries = $entries;
         $this->uploads = $uploads ?: new UploadStorage();
         $this->settings = $settings ?: new FormSettings();
         $this->mailer = $mailer ?: new Mailer($this->settings, new \BS23\FormBuilder\Notifications\TemplateRenderer());
+        $this->antiSpam = $antiSpam ?: new AntiSpamGuard();
     }
 
     public function register(): void
@@ -75,6 +78,13 @@ final class SubmissionHandler
             return;
         }
 
+        $settings = $this->settings->get($formId);
+        $antiSpam = $this->antiSpam->check($formId, is_array($posted) ? $posted : [], is_array($settings['security'] ?? null) ? $settings['security'] : []);
+        if (! $antiSpam['allowed']) {
+            $this->states[$formId]['errors']['form'] = __((string) $antiSpam['error'], 'bs23-form-builder');
+            return;
+        }
+
         $result = $this->validator->validate($schema, is_array($posted) ? $posted : []);
         if (! $result['valid']) {
             $this->states[$formId]['errors'] = $result['errors'];
@@ -88,7 +98,6 @@ final class SubmissionHandler
             return;
         }
 
-        $settings = $this->settings->get($formId);
         $this->mailer->send($formId, $entryId, $entryData, $settings);
 
         $this->states[$formId] = [
