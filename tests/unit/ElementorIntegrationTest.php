@@ -45,6 +45,10 @@ namespace BS23\FormBuilder\Tests\Unit {
             self::assertSame(10, $GLOBALS['bs23_test_actions'][0]['priority']);
         }
 
+        /**
+         * @runInSeparateProcess
+         * @preserveGlobalState disabled
+         */
         public function test_register_widgets_skips_when_elementor_widget_base_is_missing(): void
         {
             $manager = new TestWidgetsManager();
