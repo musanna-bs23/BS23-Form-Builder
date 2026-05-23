@@ -69,16 +69,23 @@ function StatIcon({ type }) {
 export default function AllFormsDashboard({ forms, onDeleteForm }) {
   const [openMenu, setOpenMenu] = useState(null);
   const [query, setQuery] = useState('');
+  const [dateFilter, setDateFilter] = useState('all');
   const filteredForms = useMemo(() => {
     const needle = query.trim().toLowerCase();
-    if (!needle) {
-      return forms;
-    }
-
-    return forms.filter((form) => (
-      String(form.id).includes(needle) || String(form.title || '').toLowerCase().includes(needle)
-    ));
-  }, [forms, query]);
+    return forms.filter((form) => {
+      const matchesQuery = !needle || String(form.id).includes(needle) || String(form.title || '').toLowerCase().includes(needle);
+      if (!matchesQuery) {
+        return false;
+      }
+      if (dateFilter === 'today') {
+        return Number(form.entries_today || 0) > 0;
+      }
+      if (dateFilter === 'month' || dateFilter === 'last30') {
+        return Number(form.entries_this_month || 0) > 0;
+      }
+      return true;
+    });
+  }, [forms, query, dateFilter]);
   const totalEntries = forms.reduce((sum, form) => sum + Number(form.entries_count || 0), 0);
   const monthEntries = forms.reduce((sum, form) => sum + Number(form.entries_this_month || 0), 0);
   const todayEntries = forms.reduce((sum, form) => sum + Number(form.entries_today || 0), 0);
@@ -132,10 +139,10 @@ export default function AllFormsDashboard({ forms, onDeleteForm }) {
 
         <section className="bs23-forms-dashboard__toolbar">
           <div className="bs23-forms-dashboard__filters" aria-label="Form filters">
-            <button type="button">All time</button>
-            <button type="button">Today</button>
-            <button type="button">Last 7 days</button>
-            <button type="button">Last 30 days</button>
+            <button className={dateFilter === 'all' ? 'is-active' : ''} onClick={() => setDateFilter('all')} type="button">All time</button>
+            <button className={dateFilter === 'today' ? 'is-active' : ''} onClick={() => setDateFilter('today')} type="button">Today</button>
+            <button className={dateFilter === 'month' ? 'is-active' : ''} onClick={() => setDateFilter('month')} type="button">This month</button>
+            <button className={dateFilter === 'last30' ? 'is-active' : ''} onClick={() => setDateFilter('last30')} type="button">Last 30 days</button>
           </div>
           <label className="bs23-forms-dashboard__search">
             <span>Search forms</span>

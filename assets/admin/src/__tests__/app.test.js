@@ -70,6 +70,25 @@ test('double-clicking a palette field adds it to the canvas', async () => {
   expect(within(screen.getByLabelText('Form canvas')).getByText('Email')).not.toBeNull();
 });
 
+test('saves a newly built form through the forms endpoint', async () => {
+  render(<App />);
+
+  await waitFor(() => expect(screen.getByText('General Fields')).not.toBeNull());
+
+  fireEvent.doubleClick(within(screen.getByLabelText('Field palette')).getByText('Email'));
+  fireEvent.click(screen.getByText('Save Form'));
+
+  await waitFor(() => expect(screen.getByText('Saved')).not.toBeNull());
+  expect(apiFetch).toHaveBeenCalledWith(expect.objectContaining({
+    path: '/bs23-form-builder/v1/forms',
+    method: 'POST',
+    data: expect.objectContaining({
+      title: 'Untitled Form',
+      schema: expect.objectContaining({ version: 1 }),
+    }),
+  }));
+});
+
 test('builder screen does not render the all forms library', async () => {
   render(<App />);
 
@@ -110,6 +129,20 @@ test('all forms screen shows dashboard table with form actions', async () => {
   expect(screen.getAllByText('Entries').length).toBeGreaterThan(0);
   expect(screen.getByText('Preview')).not.toBeNull();
   expect(screen.getByText('Delete')).not.toBeNull();
+});
+
+test('all forms date filters update visible rows and active state', async () => {
+  window.bs23FormBuilder.page = 'all_forms';
+
+  render(<App />);
+
+  await waitFor(() => expect(screen.getByText('Contact Form')).not.toBeNull());
+
+  fireEvent.click(screen.getAllByRole('button', { name: 'Today' })[0]);
+
+  expect(screen.getByText('Contact Form')).not.toBeNull();
+  expect(screen.queryByText('Quote Form')).toBeNull();
+  expect(screen.getAllByRole('button', { name: 'Today' })[0].className).toContain('is-active');
 });
 
 test('organizes builder tools into inspector tabs', async () => {

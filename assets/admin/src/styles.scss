@@ -881,7 +881,7 @@
   text-decoration: none;
 }
 
-.bs23-forms-dashboard__filters button:first-child,
+.bs23-forms-dashboard__filters button.is-active,
 .bs23-forms-dashboard__filters button:hover,
 .bs23-forms-dashboard__export:hover {
   background: var(--bs23-primary);
