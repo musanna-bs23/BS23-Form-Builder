@@ -3,10 +3,8 @@ import { useEffect, useState } from '@wordpress/element';
 
 import Canvas from './components/Canvas';
 import FormLibrary from './components/FormLibrary';
-import Palette from './components/Palette';
+import InspectorPanel from './components/InspectorPanel';
 import SaveBar from './components/SaveBar';
-import SettingsPanel from './components/SettingsPanel';
-import FieldSettingsPanel from './components/FieldSettingsPanel';
 import {
   addFieldToContainer,
   addFieldToRoot,
@@ -154,26 +152,24 @@ export default function App() {
           selectedFieldId={selectedFieldId}
         />
         <div className="bs23-builder__side">
-          <FieldSettingsPanel
+          <InspectorPanel
             field={selectedField}
             fields={schema.fields}
+            formId={formId}
+            onAddField={handleRootDrop}
+            onChangeSettings={setSettings}
             onDelete={(fieldId) => {
               setSchema((currentSchema) => deleteField(currentSchema, fieldId));
               setSelectedFieldId(null);
             }}
             onDuplicate={(fieldId) => setSchema((currentSchema) => duplicateField(currentSchema, fieldId))}
             onMove={(fieldId, direction) => setSchema((currentSchema) => moveField(currentSchema, fieldId, direction))}
+            onSaveSettings={saveFormSettings}
+            onSendTest={testEmail}
             onUpdate={(fieldId, updates) => setSchema((currentSchema) => updateField(currentSchema, fieldId, updates))}
             onUpdateSettings={(fieldId, updates) => setSchema((currentSchema) => updateFieldSettings(currentSchema, fieldId, updates))}
-          />
-        <Palette onAddField={handleRootDrop} />
-          <SettingsPanel
-            formId={formId}
-            onChange={setSettings}
-            onSave={saveFormSettings}
-            onTest={testEmail}
             settings={settings}
-            status={settingsStatus}
+            settingsStatus={settingsStatus}
           />
         </div>
       </main>

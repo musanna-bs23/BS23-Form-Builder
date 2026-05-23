@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import apiFetch from '@wordpress/api-fetch';
 import App from '../app';
 
@@ -37,18 +37,19 @@ beforeEach(() => {
 test('renders palette groups and adds email field to canvas', async () => {
   render(<App />);
 
-  await waitFor(() => expect(screen.getByText('Form Settings')).not.toBeNull());
+  await waitFor(() => expect(screen.getByText('General Fields')).not.toBeNull());
 
   expect(screen.getByText('General Fields')).not.toBeNull();
 
-  fireEvent.dragStart(screen.getByText('Email'), {
+  const palette = screen.getByLabelText('Field palette');
+  fireEvent.dragStart(within(palette).getByText('Email'), {
     dataTransfer: { setData: jest.fn() },
   });
   fireEvent.drop(screen.getByLabelText('Form canvas'), {
     dataTransfer: { getData: () => 'email' },
   });
 
-  expect(screen.getAllByText('Email')).toHaveLength(2);
+  expect(within(screen.getByLabelText('Form canvas')).getByText('Email')).not.toBeNull();
 });
 
 test('double-clicking a palette field adds it to the canvas', async () => {
@@ -56,9 +57,9 @@ test('double-clicking a palette field adds it to the canvas', async () => {
 
   await waitFor(() => expect(screen.getByText('General Fields')).not.toBeNull());
 
-  fireEvent.doubleClick(screen.getByText('Email'));
+  fireEvent.doubleClick(within(screen.getByLabelText('Field palette')).getByText('Email'));
 
-  expect(screen.getAllByText('Email')).toHaveLength(2);
+  expect(within(screen.getByLabelText('Form canvas')).getByText('Email')).not.toBeNull();
 });
 
 test('loads forms list and selects a saved form', async () => {
@@ -69,7 +70,7 @@ test('loads forms list and selects a saved form', async () => {
   fireEvent.click(screen.getByText('Contact Form'));
 
   await waitFor(() => expect(screen.getByDisplayValue('Contact Form')).not.toBeNull());
-  expect(screen.getAllByText('Email')).toHaveLength(2);
+  expect(within(screen.getByLabelText('Form canvas')).getByText('Email')).not.toBeNull();
 });
 
 test('new form resets builder to a draft', async () => {
@@ -83,4 +84,21 @@ test('new form resets builder to a draft', async () => {
 
   expect(screen.getByDisplayValue('Untitled Form')).not.toBeNull();
   expect(screen.getByText('Drop fields here')).not.toBeNull();
+});
+
+test('organizes builder tools into inspector tabs', async () => {
+  render(<App />);
+
+  await waitFor(() => expect(screen.getByRole('tab', { name: 'Fields' })).not.toBeNull());
+
+  expect(screen.getByText('General Fields')).not.toBeNull();
+
+  fireEvent.click(screen.getByRole('tab', { name: 'Email' }));
+  expect(screen.getByText('Email notification')).not.toBeNull();
+
+  fireEvent.click(screen.getByRole('tab', { name: 'Style' }));
+  expect(screen.getByText('Form width')).not.toBeNull();
+
+  fireEvent.click(screen.getByRole('tab', { name: 'Security' }));
+  expect(screen.getByText('Enable anti-spam')).not.toBeNull();
 });
