@@ -44,5 +44,24 @@ namespace BS23\FormBuilder\Tests\Unit {
             self::assertSame('elementor/widgets/register', $GLOBALS['bs23_test_actions'][0]['hook']);
             self::assertSame(10, $GLOBALS['bs23_test_actions'][0]['priority']);
         }
+
+        public function test_register_widgets_skips_when_elementor_widget_base_is_missing(): void
+        {
+            $manager = new TestWidgetsManager();
+
+            (new Integration())->registerWidgets($manager);
+
+            self::assertSame(0, $manager->registered);
+        }
+    }
+
+    final class TestWidgetsManager
+    {
+        public int $registered = 0;
+
+        public function register($widget): void
+        {
+            $this->registered++;
+        }
     }
 }

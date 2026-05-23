@@ -16,7 +16,15 @@ final class Integration
 
     public function registerWidgets($widgetsManager): void
     {
-        if (! class_exists(FormWidget::class)) {
+        if (! class_exists('\Elementor\Widget_Base')) {
+            return;
+        }
+
+        if (! class_exists(FormWidget::class, false) && defined('BS23_FORM_BUILDER_DIR')) {
+            require_once BS23_FORM_BUILDER_DIR . 'includes/Elementor/FormWidget.php';
+        }
+
+        if (! class_exists(FormWidget::class, false)) {
             return;
         }
 
