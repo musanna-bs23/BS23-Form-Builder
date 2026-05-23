@@ -23,7 +23,7 @@ export default function EntryDrawer({ entry, onClose, onDelete }) {
           {Object.entries(entry.entry_data || {}).map(([key, value]) => (
             <div key={key}>
               <span>{key}</span>
-              <strong>{Array.isArray(value) ? value.join(', ') : String(value)}</strong>
+              <strong>{renderValue(value)}</strong>
             </div>
           ))}
         </div>
@@ -33,4 +33,27 @@ export default function EntryDrawer({ entry, onClose, onDelete }) {
       </div>
     </aside>
   );
+}
+
+function renderValue(value) {
+  if (isFileValue(value)) {
+    return (
+      <a href={value.url} target="_blank" rel="noreferrer">
+        {String(value.name || value.url)}
+        {String(value.type || '').startsWith('image/') && (
+          <img alt="" src={value.url} />
+        )}
+      </a>
+    );
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((item) => isFileValue(item) ? item.name || item.url : String(item)).join(', ');
+  }
+
+  return String(value);
+}
+
+function isFileValue(value) {
+  return value && typeof value === 'object' && typeof value.url === 'string';
 }

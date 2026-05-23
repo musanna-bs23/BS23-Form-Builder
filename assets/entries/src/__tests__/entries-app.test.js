@@ -32,3 +32,10 @@ test('drawer renders decoded entry data', () => {
   expect(screen.getByText('Entry #3')).not.toBeNull();
   expect(screen.getByText('a@example.com')).not.toBeNull();
 });
+
+test('drawer renders uploaded file links', () => {
+  render(<EntryDrawer entry={{ id: 4, form_title: 'Contact', created_at: '2026-05-22', user_id: 0, user_ip: '127.0.0.1', user_agent: 'Test', entry_data: { resume: { name: 'resume.pdf', url: 'https://example.com/resume.pdf', type: 'application/pdf' } } }} onClose={() => {}} onDelete={() => {}} />);
+
+  const link = screen.getByText('resume.pdf');
+  expect(link.getAttribute('href')).toBe('https://example.com/resume.pdf');
+});

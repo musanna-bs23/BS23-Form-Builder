@@ -31,7 +31,7 @@ final class CsvExporter
 
             foreach (array_keys($fieldKeys) as $key) {
                 $value = $entry['entry_data'][$key] ?? '';
-                $row[] = is_array($value) ? implode(', ', array_map('strval', $value)) : (string) $value;
+                $row[] = $this->formatValue($value);
             }
 
             fputcsv($handle, $row);
@@ -40,5 +40,24 @@ final class CsvExporter
         rewind($handle);
 
         return (string) stream_get_contents($handle);
+    }
+
+    /**
+     * @param mixed $value
+     */
+    private function formatValue($value): string
+    {
+        if (is_array($value) && isset($value['url'])) {
+            $name = (string) ($value['name'] ?? '');
+            $url = (string) ($value['url'] ?? '');
+
+            return trim($name . ($name !== '' && $url !== '' ? ' - ' : '') . $url);
+        }
+
+        if (is_array($value)) {
+            return implode(', ', array_map(fn ($item): string => $this->formatValue($item), $value));
+        }
+
+        return (string) $value;
     }
 }
