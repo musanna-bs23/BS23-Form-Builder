@@ -1,8 +1,8 @@
 import apiFetch from '@wordpress/api-fetch';
 import { useEffect, useState } from '@wordpress/element';
 
+import AllFormsDashboard from './components/AllFormsDashboard';
 import Canvas from './components/Canvas';
-import FormLibrary from './components/FormLibrary';
 import InspectorPanel from './components/InspectorPanel';
 import SaveBar from './components/SaveBar';
 import {
@@ -16,17 +16,19 @@ import {
   updateFieldSettings,
 } from './schema';
 import { defaultSettings, loadSettings, saveSettings, sendTestEmail } from './settings-api';
-import { listForms, loadForm } from './forms-api';
+import { deleteForm, listForms, loadForm } from './forms-api';
 
 export default function App() {
+  const config = window.bs23FormBuilder || {};
   const [title, setTitle] = useState('Untitled Form');
   const [schema, setSchema] = useState({ version: 1, fields: [] });
-  const [formId, setFormId] = useState(null);
+  const [formId, setFormId] = useState(config.formId || null);
   const [status, setStatus] = useState('');
   const [selectedFieldId, setSelectedFieldId] = useState(null);
   const [settings, setSettings] = useState(defaultSettings());
   const [settingsStatus, setSettingsStatus] = useState('');
   const [forms, setForms] = useState([]);
+  const page = config.page || 'builder';
 
   useEffect(() => {
     if (!formId) {
@@ -37,7 +39,17 @@ export default function App() {
   }, [formId]);
 
   useEffect(() => {
+    if (page !== 'all_forms') {
+      return;
+    }
     listForms().then((items) => setForms(Array.isArray(items) ? items : [])).catch(() => setForms([]));
+  }, []);
+
+  useEffect(() => {
+    if (!config.formId || page !== 'builder') {
+      return;
+    }
+    selectForm(config.formId);
   }, []);
 
   const handleRootDrop = (type) => {
@@ -73,6 +85,15 @@ export default function App() {
       setStatus('Loaded');
     } catch (error) {
       setStatus(error?.message || 'Load failed');
+    }
+  };
+
+  const removeForm = async (nextFormId) => {
+    setForms((currentForms) => currentForms.filter((form) => form.id !== nextFormId));
+    try {
+      await deleteForm(nextFormId);
+    } catch (error) {
+      listForms().then((items) => setForms(Array.isArray(items) ? items : [])).catch(() => setForms([]));
     }
   };
 
@@ -129,14 +150,16 @@ export default function App() {
     }
   };
 
+  if (page === 'all_forms') {
+    return (
+      <div className="bs23-admin-shell">
+        <AllFormsDashboard forms={forms} onDeleteForm={removeForm} />
+      </div>
+    );
+  }
+
   return (
     <div className="bs23-builder">
-      <FormLibrary
-        activeFormId={formId}
-        forms={forms}
-        onNewForm={resetDraft}
-        onSelectForm={selectForm}
-      />
       <SaveBar
         onSave={saveForm}
         onTitleChange={setTitle}
@@ -156,6 +179,7 @@ export default function App() {
             field={selectedField}
             fields={schema.fields}
             formId={formId}
+            initialTab={config.inspectorTab || 'fields'}
             onAddField={handleRootDrop}
             onChangeSettings={setSettings}
             onDelete={(fieldId) => {

@@ -149,6 +149,32 @@ final class FormRestControllerTest extends WP_UnitTestCase
         $this->assertSame('Quote Form', $data[0]['title']);
         $this->assertSame(0, $data[0]['field_count']);
         $this->assertSame(2, $data[1]['field_count']);
+        $this->assertSame('[bs23_form id="' . $quoteId . '"]', $data[0]['shortcode']);
+        $this->assertSame('publish', $data[0]['status']);
+        $this->assertArrayHasKey('entries_count', $data[0]);
+        $this->assertArrayHasKey('entries_this_month', $data[0]);
+        $this->assertArrayHasKey('entries_today', $data[0]);
+        $this->assertArrayHasKey('created_at', $data[0]);
+    }
+
+    public function test_delete_removes_form(): void
+    {
+        wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
+        do_action('init');
+        do_action('rest_api_init');
+
+        $formId = $this->createFormPost('Contact Form', [
+            'version' => 1,
+            'fields' => [],
+        ]);
+
+        $request = new WP_REST_Request('DELETE', sprintf('/bs23-form-builder/v1/forms/%d', $formId));
+        $response = rest_do_request($request);
+        $data = $response->get_data();
+
+        $this->assertSame(200, $response->get_status());
+        $this->assertTrue($data['deleted']);
+        $this->assertNull(get_post($formId));
     }
 
     public function test_put_updates_title_and_schema(): void
