@@ -166,7 +166,7 @@ export default function App() {
             onUpdate={(fieldId, updates) => setSchema((currentSchema) => updateField(currentSchema, fieldId, updates))}
             onUpdateSettings={(fieldId, updates) => setSchema((currentSchema) => updateFieldSettings(currentSchema, fieldId, updates))}
           />
-          <Palette />
+        <Palette onAddField={handleRootDrop} />
           <SettingsPanel
             formId={formId}
             onChange={setSettings}

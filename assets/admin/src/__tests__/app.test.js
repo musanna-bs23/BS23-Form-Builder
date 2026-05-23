@@ -51,6 +51,16 @@ test('renders palette groups and adds email field to canvas', async () => {
   expect(screen.getAllByText('Email')).toHaveLength(2);
 });
 
+test('double-clicking a palette field adds it to the canvas', async () => {
+  render(<App />);
+
+  await waitFor(() => expect(screen.getByText('General Fields')).not.toBeNull());
+
+  fireEvent.doubleClick(screen.getByText('Email'));
+
+  expect(screen.getAllByText('Email')).toHaveLength(2);
+});
+
 test('loads forms list and selects a saved form', async () => {
   render(<App />);
 
