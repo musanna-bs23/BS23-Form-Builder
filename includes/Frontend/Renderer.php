@@ -29,7 +29,7 @@ final class Renderer
 
         ob_start();
         ?>
-        <form class="bs23-form" method="post" data-bs23-form-id="<?php echo esc_attr((string) $formId); ?>">
+        <form class="bs23-form" method="post" data-bs23-form-id="<?php echo esc_attr((string) $formId); ?>" <?php echo $this->hasUploadFields($schema['fields'] ?? []) ? 'enctype="multipart/form-data"' : ''; ?>>
             <script type="application/json" class="bs23-form__schema"><?php echo wp_json_encode($schema, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?></script>
             <?php wp_nonce_field($this->submissions->nonceAction($formId)); ?>
             <input type="hidden" name="bs23_form_id" value="<?php echo esc_attr((string) $formId); ?>" />
@@ -101,7 +101,7 @@ final class Renderer
             return $this->wrapField($field, $this->inputMarkup($field, $state, 'hidden'), $state, ['bs23-form__field', 'bs23-form__field--hidden']);
         }
 
-        $supported = ['name', 'email', 'text', 'textarea', 'number', 'dropdown', 'radio', 'checkbox', 'multiple_choice', 'url', 'phone'];
+        $supported = ['name', 'email', 'text', 'textarea', 'number', 'dropdown', 'radio', 'checkbox', 'multiple_choice', 'url', 'phone', 'file_upload', 'image_upload'];
         if (! in_array($type, $supported, true)) {
             return '';
         }
@@ -157,6 +157,10 @@ final class Renderer
             );
         }
 
+        if (in_array($type, ['file_upload', 'image_upload'], true)) {
+            return $this->fileInputMarkup($field);
+        }
+
         if (in_array($type, ['dropdown', 'radio', 'checkbox', 'multiple_choice'], true)) {
             return $this->choiceMarkup($field, $state);
         }
@@ -174,6 +178,16 @@ final class Renderer
             esc_attr($this->fieldName($field)),
             esc_attr($this->value($field, $state)),
             $inputType === 'hidden' ? '' : trim($this->requiredAttr($field) . ' ' . $this->placeholderAttr($field))
+        );
+    }
+
+    private function fileInputMarkup(array $field): string
+    {
+        return sprintf(
+            '<input type="file" name="%s" %s %s />',
+            esc_attr($this->fieldName($field)),
+            $this->requiredAttr($field),
+            $this->acceptAttr($field)
         );
     }
 
@@ -312,6 +326,42 @@ final class Renderer
         $help = (string) ($field['settings']['help'] ?? '');
 
         return $help !== '' ? '<p class="bs23-form__help">' . esc_html($help) . '</p>' : '';
+    }
+
+    private function acceptAttr(array $field): string
+    {
+        $extensions = (string) ($field['settings']['validation']['allowedExtensions'] ?? '');
+        if ($extensions === '') {
+            return '';
+        }
+
+        $accept = array_filter(array_map(
+            static fn (string $extension): string => '.' . sanitize_key(ltrim(trim($extension), '.')),
+            explode(',', $extensions)
+        ));
+
+        return $accept === [] ? '' : 'accept="' . esc_attr(implode(',', $accept)) . '"';
+    }
+
+    private function hasUploadFields(array $fields): bool
+    {
+        foreach ($fields as $field) {
+            if (! is_array($field)) {
+                continue;
+            }
+            if (in_array($field['type'] ?? '', ['file_upload', 'image_upload'], true)) {
+                return true;
+            }
+            if (($field['type'] ?? '') === 'container') {
+                foreach (($field['children'] ?? []) as $column) {
+                    if (is_array($column) && $this->hasUploadFields($column)) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     private function wrapField(array $field, string $content, array $state, array $classes): string

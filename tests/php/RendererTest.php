@@ -93,6 +93,36 @@ final class RendererTest extends WP_UnitTestCase
         $this->assertStringContainsString('Contact', $html);
     }
 
+    public function test_renderer_outputs_upload_fields_and_multipart_encoding(): void
+    {
+        $html = $this->renderer()->render(123, [
+            'version' => 1,
+            'fields' => [
+                [
+                    'id' => 'field_1',
+                    'type' => 'file_upload',
+                    'label' => 'Resume',
+                    'name' => 'resume',
+                    'required' => true,
+                    'settings' => ['validation' => ['allowedExtensions' => 'pdf,docx']],
+                ],
+                [
+                    'id' => 'field_2',
+                    'type' => 'image_upload',
+                    'label' => 'Avatar',
+                    'name' => 'avatar',
+                    'settings' => ['validation' => ['allowedExtensions' => 'jpg,png']],
+                ],
+            ],
+        ]);
+
+        $this->assertStringContainsString('enctype="multipart/form-data"', $html);
+        $this->assertStringContainsString('type="file"', $html);
+        $this->assertStringContainsString('name="resume"', $html);
+        $this->assertStringContainsString('accept=".pdf,.docx"', $html);
+        $this->assertStringContainsString('accept=".jpg,.png"', $html);
+    }
+
     private function renderer(): Renderer
     {
         return new Renderer(new SubmissionHandler(new SubmissionValidator(), new EntryRepository()));
