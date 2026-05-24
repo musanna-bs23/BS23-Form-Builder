@@ -1,24 +1,18 @@
-import { useState } from '@wordpress/element';
-
 import FieldSettingsPanel from './FieldSettingsPanel';
-import Palette from './Palette';
 import SettingsPanel from './SettingsPanel';
 
 const tabs = [
-  { id: 'fields', label: 'Fields' },
-  { id: 'field', label: 'Field' },
-  { id: 'form', label: 'Form' },
-  { id: 'email', label: 'Email' },
-  { id: 'style', label: 'Style' },
-  { id: 'security', label: 'Security' },
+  { id: 'fields', label: 'Edit Fields' },
+  { id: 'settings', label: 'Settings & Integrations' },
+  { id: 'entries', label: 'Entries' },
 ];
 
 export default function InspectorPanel({
+  activeTab,
   field,
   fields,
   formId,
-  initialTab = 'fields',
-  onAddField,
+  onChangeTab,
   onChangeSettings,
   onDelete,
   onDuplicate,
@@ -30,8 +24,6 @@ export default function InspectorPanel({
   settings,
   settingsStatus,
 }) {
-  const [activeTab, setActiveTab] = useState(initialTab);
-
   return (
     <aside className="bs23-inspector" aria-label="Builder inspector">
       <div className="bs23-inspector__tabs" role="tablist" aria-label="Builder tools">
@@ -40,7 +32,7 @@ export default function InspectorPanel({
             aria-selected={activeTab === tab.id}
             className={activeTab === tab.id ? 'is-active' : ''}
             key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
+            onClick={() => onChangeTab(tab.id)}
             role="tab"
             type="button"
           >
@@ -50,8 +42,7 @@ export default function InspectorPanel({
       </div>
 
       <div className="bs23-inspector__body">
-        {activeTab === 'fields' && <Palette onAddField={onAddField} />}
-        {activeTab === 'field' && (
+        {activeTab === 'fields' && (
           <FieldSettingsPanel
             field={field}
             fields={fields}
@@ -62,10 +53,10 @@ export default function InspectorPanel({
             onUpdateSettings={onUpdateSettings}
           />
         )}
-        {activeTab === 'form' && (
+        {activeTab === 'settings' && (
           <SettingsPanel
             formId={formId}
-            mode="form"
+            mode="all"
             onChange={onChangeSettings}
             onSave={onSaveSettings}
             onTest={onSendTest}
@@ -73,38 +64,10 @@ export default function InspectorPanel({
             status={settingsStatus}
           />
         )}
-        {activeTab === 'email' && (
-          <SettingsPanel
-            formId={formId}
-            mode="email"
-            onChange={onChangeSettings}
-            onSave={onSaveSettings}
-            onTest={onSendTest}
-            settings={settings}
-            status={settingsStatus}
-          />
-        )}
-        {activeTab === 'style' && (
-          <SettingsPanel
-            formId={formId}
-            mode="style"
-            onChange={onChangeSettings}
-            onSave={onSaveSettings}
-            onTest={onSendTest}
-            settings={settings}
-            status={settingsStatus}
-          />
-        )}
-        {activeTab === 'security' && (
-          <SettingsPanel
-            formId={formId}
-            mode="security"
-            onChange={onChangeSettings}
-            onSave={onSaveSettings}
-            onTest={onSendTest}
-            settings={settings}
-            status={settingsStatus}
-          />
+        {activeTab === 'entries' && (
+          <div className="bs23-inspector__empty">
+            Entries will appear after submissions are received.
+          </div>
         )}
       </div>
     </aside>

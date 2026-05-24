@@ -42,40 +42,63 @@ beforeEach(() => {
   });
 });
 
-test('renders palette groups and adds email field to canvas', async () => {
+test('opens block inserter from canvas plus and adds email field', async () => {
   render(<App />);
 
-  await waitFor(() => expect(screen.getByText('General Fields')).not.toBeNull());
+  await waitFor(() => expect(screen.getByDisplayValue('Untitled Form')).not.toBeNull());
 
-  expect(screen.getByText('General Fields')).not.toBeNull();
+  expect(screen.queryByLabelText('Block inserter')).toBeNull();
 
-  const palette = screen.getByLabelText('Field palette');
-  fireEvent.dragStart(within(palette).getByText('Email'), {
-    dataTransfer: { setData: jest.fn() },
-  });
-  fireEvent.drop(screen.getByLabelText('Form canvas'), {
-    dataTransfer: { getData: () => 'email' },
-  });
+  fireEvent.click(screen.getByRole('button', { name: 'Add field' }));
+
+  expect(screen.getByLabelText('Block inserter')).not.toBeNull();
+  expect(screen.getByPlaceholderText('Search for a block')).not.toBeNull();
+  expect(screen.getByRole('tab', { name: 'General' })).not.toBeNull();
+  expect(screen.getByRole('tab', { name: 'Advanced' })).not.toBeNull();
+  expect(screen.getByRole('tab', { name: 'Container' })).not.toBeNull();
+
+  fireEvent.change(screen.getByPlaceholderText('Search for a block'), { target: { value: 'email' } });
+  fireEvent.click(within(screen.getByLabelText('Block inserter')).getByText('Email'));
 
   expect(within(screen.getByLabelText('Form canvas')).getByText('Email')).not.toBeNull();
+  expect(screen.queryByLabelText('Block inserter')).toBeNull();
 });
 
-test('double-clicking a palette field adds it to the canvas', async () => {
+test('block inserter category tabs filter available fields', async () => {
   render(<App />);
 
-  await waitFor(() => expect(screen.getByText('General Fields')).not.toBeNull());
+  await waitFor(() => expect(screen.getByDisplayValue('Untitled Form')).not.toBeNull());
 
-  fireEvent.doubleClick(within(screen.getByLabelText('Field palette')).getByText('Email'));
+  fireEvent.click(screen.getByRole('button', { name: 'Add field' }));
+  fireEvent.click(screen.getByRole('tab', { name: 'Container' }));
 
-  expect(within(screen.getByLabelText('Form canvas')).getByText('Email')).not.toBeNull();
+  expect(within(screen.getByLabelText('Block inserter')).getByText('Two Column Container')).not.toBeNull();
+  expect(within(screen.getByLabelText('Block inserter')).queryByText('Email')).toBeNull();
+});
+
+test('field canvas actions duplicate and delete selected fields', async () => {
+  render(<App />);
+
+  await waitFor(() => expect(screen.getByDisplayValue('Untitled Form')).not.toBeNull());
+
+  fireEvent.click(screen.getByRole('button', { name: 'Add field' }));
+  fireEvent.click(within(screen.getByLabelText('Block inserter')).getByText('Email'));
+  fireEvent.click(within(screen.getByLabelText('Form canvas')).getByText('Email'));
+
+  fireEvent.click(screen.getByRole('button', { name: 'Duplicate Email' }));
+  expect(within(screen.getByLabelText('Form canvas')).getAllByText('Email')).toHaveLength(2);
+
+  fireEvent.click(screen.getAllByRole('button', { name: 'Delete Email' })[0]);
+  expect(within(screen.getByLabelText('Form canvas')).getAllByText('Email')).toHaveLength(1);
 });
 
 test('saves a newly built form through the forms endpoint', async () => {
   render(<App />);
 
-  await waitFor(() => expect(screen.getByText('General Fields')).not.toBeNull());
+  await waitFor(() => expect(screen.getByDisplayValue('Untitled Form')).not.toBeNull());
 
-  fireEvent.doubleClick(within(screen.getByLabelText('Field palette')).getByText('Email'));
+  fireEvent.click(screen.getByRole('button', { name: 'Add field' }));
+  fireEvent.click(within(screen.getByLabelText('Block inserter')).getByText('Email'));
   fireEvent.click(screen.getByText('Save Form'));
 
   await waitFor(() => expect(screen.getByText('Saved')).not.toBeNull());
@@ -92,7 +115,7 @@ test('saves a newly built form through the forms endpoint', async () => {
 test('builder screen does not render the all forms library', async () => {
   render(<App />);
 
-  await waitFor(() => expect(screen.getByText('General Fields')).not.toBeNull());
+  await waitFor(() => expect(screen.getByDisplayValue('Untitled Form')).not.toBeNull());
 
   expect(screen.getByDisplayValue('Untitled Form')).not.toBeNull();
   expect(screen.queryByLabelText('Forms library')).toBeNull();
@@ -181,16 +204,15 @@ test('all forms paginates only when more than ten rows are visible', async () =>
 test('organizes builder tools into inspector tabs', async () => {
   render(<App />);
 
-  await waitFor(() => expect(screen.getByRole('tab', { name: 'Fields' })).not.toBeNull());
+  await waitFor(() => expect(screen.getByRole('tab', { name: 'Edit Fields' })).not.toBeNull());
 
-  expect(screen.getByText('General Fields')).not.toBeNull();
+  expect(screen.getByRole('button', { name: 'Add field' })).not.toBeNull();
 
-  fireEvent.click(screen.getByRole('tab', { name: 'Email' }));
+  fireEvent.click(screen.getByRole('tab', { name: 'Settings & Integrations' }));
   expect(screen.getByText('Email notification')).not.toBeNull();
-
-  fireEvent.click(screen.getByRole('tab', { name: 'Style' }));
-  expect(screen.getByText('Form width')).not.toBeNull();
-
-  fireEvent.click(screen.getByRole('tab', { name: 'Security' }));
+  expect(screen.getByText('Message')).not.toBeNull();
   expect(screen.getByText('Enable anti-spam')).not.toBeNull();
+
+  fireEvent.click(screen.getByRole('tab', { name: 'Entries' }));
+  expect(screen.getByText('Entries will appear after submissions are received.')).not.toBeNull();
 });

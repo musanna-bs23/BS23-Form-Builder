@@ -11,6 +11,9 @@ export default function SaveBar({ title, onTitleChange, onSave, status }) {
       <button className="button button-primary" onClick={onSave} type="button">
         Save Form
       </button>
+      <button className="button bs23-builder__preview" type="button">
+        Preview
+      </button>
       <span className="bs23-builder__status" role="status">
         {status}
       </span>
