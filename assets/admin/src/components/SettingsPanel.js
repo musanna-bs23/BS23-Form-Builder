@@ -1,8 +1,9 @@
 export default function SettingsPanel({ formId, mode = 'all', settings, status, onChange, onSave, onTest }) {
-  const notification = settings.notification;
+  const notification = settings.notification || {};
   const confirmation = settings.confirmation;
   const security = settings.security || {};
   const style = settings.style || {};
+  const emailEnabled = notification.enabled !== false;
 
   const updateNotification = (key, value) => onChange({
     ...settings,
@@ -36,25 +37,25 @@ export default function SettingsPanel({ formId, mode = 'all', settings, status, 
       {showEmail && (
       <section>
         <h3>Email notification</h3>
-        <label className="bs23-settings-panel__toggle">
+        <label className="bs23-settings-panel__toggle bs23-settings-panel__toggle--primary">
           <input
             type="checkbox"
-            checked={notification.enabled}
+            checked={emailEnabled}
             onChange={(event) => updateNotification('enabled', event.target.checked)}
           />
-          Send admin notification
+          Send email notifications
         </label>
         <label>Send to
-          <input value={notification.to} onChange={(event) => updateNotification('to', event.target.value)} />
+          <input disabled={!emailEnabled} value={notification.to || ''} onChange={(event) => updateNotification('to', event.target.value)} />
         </label>
         <label>Subject
-          <input value={notification.subject} onChange={(event) => updateNotification('subject', event.target.value)} />
+          <input disabled={!emailEnabled} value={notification.subject || ''} onChange={(event) => updateNotification('subject', event.target.value)} />
         </label>
         <label>Message
-          <textarea rows="5" value={notification.message} onChange={(event) => updateNotification('message', event.target.value)} />
+          <textarea disabled={!emailEnabled} rows="5" value={notification.message || ''} onChange={(event) => updateNotification('message', event.target.value)} />
         </label>
         <label>Reply-to field
-          <input value={notification.reply_to} placeholder="email" onChange={(event) => updateNotification('reply_to', event.target.value)} />
+          <input disabled={!emailEnabled} value={notification.reply_to || ''} placeholder="email" onChange={(event) => updateNotification('reply_to', event.target.value)} />
         </label>
       </section>
       )}
@@ -146,7 +147,7 @@ export default function SettingsPanel({ formId, mode = 'all', settings, status, 
       {showActions && (
       <footer>
         <button type="button" className="button button-primary" disabled={!formId} onClick={onSave}>Save Settings</button>
-        <button type="button" className="button" disabled={!formId} onClick={onTest}>Send Test</button>
+        <button type="button" className="button" disabled={!formId || !emailEnabled} onClick={onTest}>Send Test</button>
       </footer>
       )}
     </aside>

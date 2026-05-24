@@ -30,6 +30,23 @@ test('settings panel calls test email action', () => {
   expect(onTest).toHaveBeenCalled();
 });
 
+test('settings panel can disable email notifications before sending', () => {
+  const onChange = jest.fn();
+  const settings = defaultSettings();
+  settings.notification.enabled = false;
+  render(<SettingsPanel formId={1} settings={settings} status="" onChange={onChange} onSave={() => {}} onTest={() => {}} />);
+
+  expect(screen.getByLabelText('Send email notifications').checked).toBe(false);
+  expect(screen.getByLabelText('Send to').disabled).toBe(true);
+  expect(screen.getByText('Send Test').disabled).toBe(true);
+
+  fireEvent.click(screen.getByLabelText('Send email notifications'));
+
+  expect(onChange).toHaveBeenCalledWith(expect.objectContaining({
+    notification: expect.objectContaining({ enabled: true }),
+  }));
+});
+
 test('settings panel emits changed style payload', () => {
   const onChange = jest.fn();
   render(<SettingsPanel formId={1} settings={defaultSettings()} status="" onChange={onChange} onSave={() => {}} onTest={() => {}} />);
