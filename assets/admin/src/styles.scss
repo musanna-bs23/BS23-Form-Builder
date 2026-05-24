@@ -46,7 +46,7 @@
 
 .bs23-form-library {
   align-self: start;
-  background: linear-gradient(180deg, rgba(12, 24, 58, 0.96), rgba(23, 33, 76, 0.94));
+  background: var(--bs23-primary-dark);
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 8px;
   box-shadow: var(--bs23-shadow);
@@ -125,7 +125,7 @@
 
 .bs23-form-library__list button.is-active,
 .bs23-form-library__list button:hover {
-  background: linear-gradient(135deg, rgba(36, 84, 255, 0.55), rgba(0, 166, 166, 0.36));
+  background: rgba(73, 146, 193, 0.32);
   border-color: rgba(255, 255, 255, 0.34);
 }
 
@@ -397,7 +397,7 @@
 }
 
 .bs23-palette-group {
-  background: linear-gradient(180deg, #ffffff, #fbfdff);
+  background: #ffffff;
   border: 1px solid rgba(15, 23, 42, 0.08);
   border-radius: 8px;
   padding: 14px;
@@ -422,10 +422,8 @@
 
 .bs23-palette-item {
   align-items: center;
-  background:
-    linear-gradient(#ffffff, #ffffff) padding-box,
-    linear-gradient(135deg, rgba(36, 84, 255, 0.24), rgba(0, 166, 166, 0.24)) border-box;
-  border: 1px solid transparent;
+  background: #ffffff;
+  border: 1px solid rgba(73, 146, 193, 0.24);
   color: #1f2937;
   cursor: grab;
   display: flex;
@@ -439,9 +437,7 @@
 }
 
 .bs23-palette-item:hover {
-  background:
-    linear-gradient(135deg, rgba(36, 84, 255, 0.1), rgba(0, 166, 166, 0.1)) padding-box,
-    linear-gradient(135deg, rgba(36, 84, 255, 0.82), rgba(0, 166, 166, 0.82)) border-box;
+  background: rgba(73, 146, 193, 0.1);
   box-shadow: 0 10px 22px rgba(36, 84, 255, 0.12);
 }
 
@@ -690,7 +686,7 @@
 }
 
 .bs23-settings-panel footer .button-primary {
-  background: linear-gradient(135deg, var(--bs23-primary), var(--bs23-accent));
+  background: var(--bs23-primary);
   border: 0;
   color: #ffffff;
 }
@@ -1492,13 +1488,13 @@ body.bs23-forms_page_bs23-form-builder-entries .update-nag {
 }
 
 .bs23-field-card__toolbar {
-  background: linear-gradient(90deg, var(--bs23-ui-primary), var(--bs23-ui-primary-dark));
+  background: var(--bs23-ui-primary-dark);
   border-radius: 8px;
   box-shadow: 0 8px 18px rgba(17, 30, 64, 0.18);
 }
 
 .bs23-builder__insert-button {
-  background: linear-gradient(135deg, var(--bs23-ui-primary), var(--bs23-ui-primary-dark));
+  background: var(--bs23-ui-primary);
   box-shadow: 0 8px 18px rgba(17, 30, 64, 0.18);
   height: 32px;
   width: 32px;
@@ -1550,7 +1546,7 @@ body.bs23-forms_page_bs23-form-builder-entries .update-nag {
 }
 
 .bs23-inspector__tabs button.is-active::after {
-  background: linear-gradient(90deg, var(--bs23-ui-primary), var(--bs23-ui-primary-dark));
+  background: var(--bs23-ui-primary);
   border-radius: 999px;
   bottom: -1px;
   content: "";
@@ -1698,7 +1694,7 @@ body.bs23-forms_page_bs23-form-builder-entries .update-nag {
 }
 
 .bs23-forms-hero {
-  background: linear-gradient(135deg, #4992c1 0%, #2e6e97 55%, #111e40 100%);
+  background: var(--bs23-ui-primary-dark);
   border-bottom: 1px solid var(--bs23-ui-border);
   margin: 0 -24px;
   min-height: auto;
@@ -1749,7 +1745,7 @@ body.bs23-forms_page_bs23-form-builder-entries .update-nag {
 }
 
 .bs23-forms-dashboard__stats article::before {
-  background: linear-gradient(90deg, var(--bs23-ui-primary), var(--bs23-ui-primary-dark));
+  background: var(--bs23-ui-primary);
   content: "";
   height: 4px;
   left: 0;
@@ -1759,7 +1755,7 @@ body.bs23-forms_page_bs23-form-builder-entries .update-nag {
 }
 
 .bs23-stat-card__icon {
-  background: linear-gradient(135deg, #4992c1, #2e6e97);
+  background: var(--bs23-ui-primary);
   border-radius: 12px;
 }
 
@@ -1804,6 +1800,163 @@ body.bs23-forms_page_bs23-form-builder-entries .update-nag {
 .bs23-forms-table__actions > button {
   border-color: rgba(73, 146, 193, 0.4);
   color: var(--bs23-ui-primary);
+}
+
+.bs23-preview-page {
+  background: #eeeeee;
+  color: #000000;
+  min-height: 100vh;
+  padding: 0 20px 32px;
+}
+
+.bs23-preview-tabs {
+  align-items: center;
+  background: #ffffff;
+  border-bottom: 1px solid #dddddd;
+  display: flex;
+  gap: 0;
+  margin: 0 -20px 30px;
+  min-height: 52px;
+}
+
+.bs23-preview-tabs strong,
+.bs23-preview-tabs span {
+  align-items: center;
+  border-right: 1px solid #eeeeee;
+  display: inline-flex;
+  min-height: 52px;
+  padding: 0 18px;
+}
+
+.bs23-preview-tabs strong {
+  font-weight: 600;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bs23-preview-frame {
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(17, 30, 64, 0.08);
+  min-height: 680px;
+  overflow: hidden;
+}
+
+.bs23-preview-frame > header {
+  align-items: center;
+  border-bottom: 1px solid #dddddd;
+  display: flex;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0 20px;
+}
+
+.bs23-preview-frame > header > span {
+  border-radius: 999px;
+  height: 13px;
+  width: 13px;
+}
+
+.bs23-preview-frame .is-red {
+  background: #f15f62;
+}
+
+.bs23-preview-frame .is-yellow {
+  background: #f6be4f;
+}
+
+.bs23-preview-frame .is-green {
+  background: #23c187;
+}
+
+.bs23-preview-frame__devices {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.bs23-preview-frame__devices button {
+  background: #ffffff;
+  border: 0;
+  color: #777777;
+  cursor: pointer;
+  font-size: 0;
+  height: 24px;
+  position: relative;
+  width: 24px;
+}
+
+.bs23-preview-frame__devices button::before {
+  border: 2px solid currentColor;
+  border-radius: 3px;
+  content: "";
+  height: 14px;
+  left: 5px;
+  position: absolute;
+  top: 4px;
+  width: 14px;
+}
+
+.bs23-preview-frame__devices button.is-active {
+  color: #2379f6;
+}
+
+.bs23-preview-form {
+  display: grid;
+  gap: 20px;
+  padding: 22px 20px;
+}
+
+.bs23-preview__field {
+  display: grid;
+  gap: 8px;
+}
+
+.bs23-preview__field span {
+  color: #000000;
+  font-size: 16px;
+}
+
+.bs23-preview__field input,
+.bs23-preview__field textarea,
+.bs23-preview__field select {
+  border: 1px solid #d3d8e0;
+  border-radius: 6px;
+  color: #000000;
+  font-size: 16px;
+  min-height: 42px;
+  padding: 10px 15px;
+  width: 100%;
+}
+
+.bs23-preview__field input::placeholder,
+.bs23-preview__field textarea::placeholder {
+  color: #8b95a5;
+}
+
+.bs23-preview__columns {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(var(--bs23-preview-columns), minmax(0, 1fr));
+}
+
+.bs23-preview__column {
+  display: grid;
+  gap: 20px;
+}
+
+.bs23-preview-form > button {
+  background: #2379f6;
+  border: 0;
+  border-radius: 6px;
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 16px;
+  justify-self: start;
+  min-height: 42px;
+  padding: 10px 22px;
 }
 
 @media (max-width: 1180px) {

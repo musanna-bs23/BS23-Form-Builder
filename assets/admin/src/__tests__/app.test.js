@@ -5,6 +5,7 @@ import App from '../app';
 jest.mock('@wordpress/api-fetch', () => jest.fn());
 
 beforeEach(() => {
+  jest.restoreAllMocks();
   window.bs23FormBuilder = {
     adminUrl: 'https://example.test/wp-admin/admin.php',
     page: 'builder',
@@ -130,6 +131,65 @@ test('saves a newly built form through the forms endpoint', async () => {
       schema: expect.objectContaining({ version: 1 }),
     }),
   }));
+});
+
+test('falls back to creating a form when the loaded form id no longer exists', async () => {
+  window.bs23FormBuilder.formId = 999;
+  apiFetch.mockImplementation((request) => {
+    if (request.path === '/bs23-form-builder/v1/forms/999') {
+      return Promise.reject(new Error('Form not found.'));
+    }
+    if (request.path === '/bs23-form-builder/v1/forms') {
+      return Promise.resolve({
+        id: 15,
+        title: 'Untitled Form',
+        schema: { version: 1, fields: [] },
+      });
+    }
+    return Promise.resolve({});
+  });
+
+  render(<App />);
+
+  await waitFor(() => expect(screen.getByText('Form not found. Starting a new form.')).not.toBeNull());
+
+  fireEvent.click(screen.getByText('Save Form'));
+
+  await waitFor(() => expect(screen.getByText('Saved')).not.toBeNull());
+  expect(apiFetch).toHaveBeenCalledWith(expect.objectContaining({
+    path: '/bs23-form-builder/v1/forms',
+    method: 'POST',
+  }));
+});
+
+test('preview and design opens a new tab for an existing form', async () => {
+  window.bs23FormBuilder.formId = 7;
+  const open = jest.spyOn(window, 'open').mockImplementation(() => null);
+
+  render(<App />);
+
+  await waitFor(() => expect(screen.getByDisplayValue('Contact Form')).not.toBeNull());
+
+  fireEvent.click(screen.getByText('Preview & Design'));
+
+  expect(open).toHaveBeenCalledWith(
+    '/wp-admin/admin.php?page=bs23-form-builder-add-new&form_id=7&preview=1',
+    '_blank',
+    'noopener'
+  );
+});
+
+test('preview mode renders a browser-style form preview', async () => {
+  window.bs23FormBuilder.formId = 7;
+  window.bs23FormBuilder.preview = true;
+
+  render(<App />);
+
+  await waitFor(() => expect(screen.getByText('Contact Form')).not.toBeNull());
+
+  expect(screen.getByLabelText('Form preview')).not.toBeNull();
+  expect(screen.getByText('Submit')).not.toBeNull();
+  expect(screen.queryByRole('button', { name: 'Save Form' })).toBeNull();
 });
 
 test('builder screen does not render the all forms library', async () => {

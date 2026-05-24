@@ -3,6 +3,7 @@ import { useEffect, useState } from '@wordpress/element';
 
 import AllFormsDashboard from './components/AllFormsDashboard';
 import Canvas from './components/Canvas';
+import FormPreview from './components/FormPreview';
 import InspectorPanel from './components/InspectorPanel';
 import SaveBar from './components/SaveBar';
 import {
@@ -29,6 +30,7 @@ export default function App() {
   const [settingsStatus, setSettingsStatus] = useState('');
   const [forms, setForms] = useState([]);
   const [activeBuilderTab, setActiveBuilderTab] = useState(config.inspectorTab === 'email' ? 'settings' : 'editor');
+  const [formMissing, setFormMissing] = useState(false);
   const page = config.page || 'builder';
 
   useEffect(() => {
@@ -80,12 +82,18 @@ export default function App() {
     try {
       const form = await loadForm(nextFormId);
       setFormId(form.id);
+      setFormMissing(false);
       setTitle(form.title || 'Untitled Form');
       setSchema(form.schema || { version: 1, fields: [] });
       setSelectedFieldId(null);
       setStatus('Loaded');
     } catch (error) {
-      setStatus(error?.message || 'Load failed');
+      setFormId(null);
+      setFormMissing(true);
+      setTitle('Untitled Form');
+      setSchema({ version: 1, fields: [] });
+      setSelectedFieldId(null);
+      setStatus(`${error?.message || 'Load failed'} Starting a new form.`);
     }
   };
 
@@ -110,18 +118,32 @@ export default function App() {
 
     try {
       const savedForm = await apiFetch({
-        path: formId === null ? '/bs23-form-builder/v1/forms' : `/bs23-form-builder/v1/forms/${formId}`,
-        method: formId === null ? 'POST' : 'PUT',
+        path: formId === null || formMissing ? '/bs23-form-builder/v1/forms' : `/bs23-form-builder/v1/forms/${formId}`,
+        method: formId === null || formMissing ? 'POST' : 'PUT',
         data: { title, schema },
       });
 
       if (savedForm?.id) {
         setFormId(savedForm.id);
       }
+      setFormMissing(false);
       setStatus('Saved');
     } catch (error) {
       setStatus(error?.message || 'Save failed');
     }
+  };
+
+  const previewForm = () => {
+    if (!formId || formMissing) {
+      setStatus('Save form before preview.');
+      return;
+    }
+    const base = config.adminUrl || 'admin.php';
+    const url = new URL(base, 'https://bs23.local');
+    url.searchParams.set('page', 'bs23-form-builder-add-new');
+    url.searchParams.set('form_id', formId);
+    url.searchParams.set('preview', '1');
+    window.open(`${url.pathname}${url.search}`, '_blank', 'noopener');
   };
 
   const saveFormSettings = async () => {
@@ -159,12 +181,18 @@ export default function App() {
     );
   }
 
+  if (config.preview) {
+    return <FormPreview schema={schema} title={title} />;
+  }
+
   return (
     <div className="bs23-builder">
       <SaveBar
         activeTab={activeBuilderTab}
         onChangeTab={setActiveBuilderTab}
+        formId={formId}
         onSave={saveForm}
+        onPreview={previewForm}
         onTitleChange={setTitle}
         status={status}
         title={title}

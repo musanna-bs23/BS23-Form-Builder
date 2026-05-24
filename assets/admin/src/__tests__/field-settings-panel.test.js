@@ -71,6 +71,33 @@ test('field settings panel enables and edits conditional logic', () => {
   });
 });
 
+test('field settings panel enables conditional logic with only one eligible field', () => {
+  const onUpdateSettings = jest.fn();
+  render(
+    <FieldSettingsPanel
+      field={{ ...field, settings: {} }}
+      fields={[
+        { id: 'field_1', type: 'dropdown', label: 'Department', name: 'department', settings: {} },
+      ]}
+      onUpdate={() => {}}
+      onUpdateSettings={onUpdateSettings}
+      onDelete={() => {}}
+      onDuplicate={() => {}}
+      onMove={() => {}}
+    />
+  );
+
+  fireEvent.click(screen.getByLabelText('Enable conditional logic'));
+  expect(onUpdateSettings).toHaveBeenCalledWith('field_1', {
+    conditionalLogic: {
+      enabled: true,
+      action: 'show',
+      match: 'all',
+      rules: [{ field: 'department', operator: 'equals', value: '' }],
+    },
+  });
+});
+
 test('field settings panel updates conditional rule values', () => {
   const onUpdateSettings = jest.fn();
   render(
