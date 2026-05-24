@@ -4,7 +4,7 @@ const tabs = [
   { id: 'entries', label: 'Entries' },
 ];
 
-export default function SaveBar({ title, onTitleChange, onSave, status, activeTab, onChangeTab }) {
+export default function SaveBar({ title, onTitleChange, onSave, status, activeTab, onChangeTab, formId, onPreview }) {
   return (
     <header className="bs23-builder__header">
       <div className="bs23-builder__title-wrap">
@@ -32,9 +32,9 @@ export default function SaveBar({ title, onTitleChange, onSave, status, activeTa
         ))}
       </nav>
       <button className="button bs23-builder__shortcode" type="button">
-        [bs23_form id="0"]
+        [bs23_form id="{formId || 0}"]
       </button>
-      <button className="button bs23-builder__preview" type="button">
+      <button className="button bs23-builder__preview" onClick={onPreview} type="button">
         Preview & Design
       </button>
       <button className="button button-primary" onClick={onSave} type="button">

@@ -42,7 +42,16 @@ export function conditionNeedsValue(operator) {
 
 export function conditionSourceFields(fields, selectedFieldId) {
   return flattenFields(fields)
-    .filter((field) => field.id !== selectedFieldId && sourceTypes.has(field.type))
+    .filter((field) => sourceTypes.has(field.type))
+    .sort((first, second) => {
+      if (first.id === selectedFieldId) {
+        return 1;
+      }
+      if (second.id === selectedFieldId) {
+        return -1;
+      }
+      return 0;
+    })
     .map((field) => ({
       id: field.id,
       label: field.label || field.name || field.id,

@@ -19,7 +19,7 @@ test('creates a default show rule payload', () => {
   });
 });
 
-test('lists eligible source fields from root and container children', () => {
+test('lists eligible source fields from root and container children including the selected field', () => {
   const fields = [
     { id: 'field_1', type: 'email', label: 'Email Address', name: 'email', settings: {} },
     { id: 'field_2', type: 'section_break', label: 'Section', name: 'section', settings: {} },
@@ -36,6 +36,7 @@ test('lists eligible source fields from root and container children', () => {
 
   expect(conditionSourceFields(fields, 'field_3')).toEqual([
     { id: 'field_1', label: 'Email Address', name: 'email' },
+    { id: 'field_3', label: 'Department', name: 'department' },
   ]);
 });
 

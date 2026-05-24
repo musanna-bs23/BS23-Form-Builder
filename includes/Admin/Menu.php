@@ -90,6 +90,7 @@ final class Menu
             'formId' => isset($_GET['form_id']) ? absint(wp_unslash($_GET['form_id'])) : 0,
             'inspectorTab' => isset($_GET['inspector']) ? sanitize_key(wp_unslash((string) $_GET['inspector'])) : '',
             'page' => $hook === 'toplevel_page_bs23-form-builder' ? 'all_forms' : 'builder',
+            'preview' => isset($_GET['preview']) && absint(wp_unslash($_GET['preview'])) === 1,
             'restUrl' => esc_url_raw(rest_url('bs23-form-builder/v1')),
             'nonce' => wp_create_nonce('wp_rest'),
         ]);
