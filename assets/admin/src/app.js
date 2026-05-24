@@ -28,7 +28,7 @@ export default function App() {
   const [settings, setSettings] = useState(defaultSettings());
   const [settingsStatus, setSettingsStatus] = useState('');
   const [forms, setForms] = useState([]);
-  const [activeBuilderTab, setActiveBuilderTab] = useState(config.inspectorTab === 'email' ? 'settings' : 'fields');
+  const [activeBuilderTab, setActiveBuilderTab] = useState(config.inspectorTab === 'email' ? 'settings' : 'editor');
   const page = config.page || 'builder';
 
   useEffect(() => {
@@ -162,6 +162,8 @@ export default function App() {
   return (
     <div className="bs23-builder">
       <SaveBar
+        activeTab={activeBuilderTab}
+        onChangeTab={setActiveBuilderTab}
         onSave={saveForm}
         onTitleChange={setTitle}
         status={status}
@@ -187,6 +189,7 @@ export default function App() {
             field={selectedField}
             fields={schema.fields}
             formId={formId}
+            onAddField={handleRootDrop}
             onChangeTab={setActiveBuilderTab}
             onChangeSettings={setSettings}
             onDelete={(fieldId) => {
