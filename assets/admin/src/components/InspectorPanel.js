@@ -1,10 +1,12 @@
+import { useState } from '@wordpress/element';
+
 import FieldSettingsPanel from './FieldSettingsPanel';
+import Palette from './Palette';
 import SettingsPanel from './SettingsPanel';
 
-const tabs = [
-  { id: 'fields', label: 'Edit Fields' },
-  { id: 'settings', label: 'Settings & Integrations' },
-  { id: 'entries', label: 'Entries' },
+const sideTabs = [
+  { id: 'fields', label: 'Input Fields' },
+  { id: 'customize', label: 'Input Customization' },
 ];
 
 export default function InspectorPanel({
@@ -12,6 +14,7 @@ export default function InspectorPanel({
   field,
   fields,
   formId,
+  onAddField,
   onChangeTab,
   onChangeSettings,
   onDelete,
@@ -24,15 +27,18 @@ export default function InspectorPanel({
   settings,
   settingsStatus,
 }) {
+  const [sideTab, setSideTab] = useState('fields');
+
   return (
     <aside className="bs23-inspector" aria-label="Builder inspector">
+      {activeTab === 'editor' && (
       <div className="bs23-inspector__tabs" role="tablist" aria-label="Builder tools">
-        {tabs.map((tab) => (
+        {sideTabs.map((tab) => (
           <button
-            aria-selected={activeTab === tab.id}
-            className={activeTab === tab.id ? 'is-active' : ''}
+            aria-selected={sideTab === tab.id}
+            className={sideTab === tab.id ? 'is-active' : ''}
             key={tab.id}
-            onClick={() => onChangeTab(tab.id)}
+            onClick={() => setSideTab(tab.id)}
             role="tab"
             type="button"
           >
@@ -40,9 +46,13 @@ export default function InspectorPanel({
           </button>
         ))}
       </div>
+      )}
 
       <div className="bs23-inspector__body">
-        {activeTab === 'fields' && (
+        {activeTab === 'editor' && sideTab === 'fields' && (
+          <Palette onAddField={onAddField} />
+        )}
+        {activeTab === 'editor' && sideTab === 'customize' && (
           <FieldSettingsPanel
             field={field}
             fields={fields}

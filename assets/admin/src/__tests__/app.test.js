@@ -64,6 +64,26 @@ test('opens block inserter from canvas plus and adds email field', async () => {
   expect(screen.queryByLabelText('Block inserter')).toBeNull();
 });
 
+test('builder uses source editor layout with top tabs and right field sidebar', async () => {
+  render(<App />);
+
+  await waitFor(() => expect(screen.getByDisplayValue('Untitled Form')).not.toBeNull());
+
+  expect(screen.getByRole('tab', { name: 'Editor' })).not.toBeNull();
+  expect(screen.getByRole('tab', { name: 'Settings & Integrations' })).not.toBeNull();
+  expect(screen.getByRole('tab', { name: 'Entries' })).not.toBeNull();
+  expect(screen.getByRole('tab', { name: 'Input Fields' })).not.toBeNull();
+  expect(screen.getByRole('tab', { name: 'Input Customization' })).not.toBeNull();
+  expect(screen.getByText('General Fields')).not.toBeNull();
+
+  fireEvent.click(screen.getByRole('button', { name: 'Email' }));
+
+  expect(within(screen.getByLabelText('Form canvas')).getByText('Email')).not.toBeNull();
+
+  fireEvent.click(screen.getByRole('tab', { name: 'Input Customization' }));
+  expect(screen.getByText('Field Settings')).not.toBeNull();
+});
+
 test('block inserter category tabs filter available fields', async () => {
   render(<App />);
 
@@ -204,7 +224,7 @@ test('all forms paginates only when more than ten rows are visible', async () =>
 test('organizes builder tools into inspector tabs', async () => {
   render(<App />);
 
-  await waitFor(() => expect(screen.getByRole('tab', { name: 'Edit Fields' })).not.toBeNull());
+  await waitFor(() => expect(screen.getByRole('tab', { name: 'Editor' })).not.toBeNull());
 
   expect(screen.getByRole('button', { name: 'Add field' })).not.toBeNull();
 
