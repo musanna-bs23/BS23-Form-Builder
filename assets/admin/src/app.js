@@ -28,6 +28,7 @@ export default function App() {
   const [settings, setSettings] = useState(defaultSettings());
   const [settingsStatus, setSettingsStatus] = useState('');
   const [forms, setForms] = useState([]);
+  const [activeBuilderTab, setActiveBuilderTab] = useState(config.inspectorTab === 'email' ? 'settings' : 'fields');
   const page = config.page || 'builder';
 
   useEffect(() => {
@@ -171,16 +172,22 @@ export default function App() {
           fields={schema.fields}
           onDropContainer={handleContainerDrop}
           onDropRoot={handleRootDrop}
+          onDelete={(fieldId) => {
+            setSchema((currentSchema) => deleteField(currentSchema, fieldId));
+            setSelectedFieldId(null);
+          }}
+          onDuplicate={(fieldId) => setSchema((currentSchema) => duplicateField(currentSchema, fieldId))}
+          onMove={(fieldId, direction) => setSchema((currentSchema) => moveField(currentSchema, fieldId, direction))}
           onSelectField={setSelectedFieldId}
           selectedFieldId={selectedFieldId}
         />
         <div className="bs23-builder__side">
           <InspectorPanel
+            activeTab={activeBuilderTab}
             field={selectedField}
             fields={schema.fields}
             formId={formId}
-            initialTab={config.inspectorTab || 'fields'}
-            onAddField={handleRootDrop}
+            onChangeTab={setActiveBuilderTab}
             onChangeSettings={setSettings}
             onDelete={(fieldId) => {
               setSchema((currentSchema) => deleteField(currentSchema, fieldId));

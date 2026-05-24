@@ -4,7 +4,15 @@ function getDraggedType(event) {
   return event.dataTransfer.getData('text/plain') || event.dataTransfer.getData('text');
 }
 
-export default function ContainerField({ field, onDropField, selectedFieldId, onSelectField }) {
+export default function ContainerField({
+  field,
+  onDropField,
+  selectedFieldId,
+  onSelectField,
+  onDelete,
+  onDuplicate,
+  onMove,
+}) {
   return (
     <section className="bs23-container-field" aria-label={`${field.columns} column container`}>
       <div
@@ -32,6 +40,9 @@ export default function ContainerField({ field, onDropField, selectedFieldId, on
                     field={child}
                     key={child.id}
                     onDropField={onDropField}
+                    onDelete={onDelete}
+                    onDuplicate={onDuplicate}
+                    onMove={onMove}
                     onSelectField={onSelectField}
                     selectedFieldId={selectedFieldId}
                   />
@@ -39,6 +50,9 @@ export default function ContainerField({ field, onDropField, selectedFieldId, on
                   <FieldCard
                     field={child}
                     key={child.id}
+                    onDelete={onDelete}
+                    onDuplicate={onDuplicate}
+                    onMove={onMove}
                     onSelect={onSelectField}
                     selected={selectedFieldId === child.id}
                   />
