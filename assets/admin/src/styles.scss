@@ -676,6 +676,15 @@
   justify-content: start;
 }
 
+.bs23-settings-panel__toggle--primary {
+  background: #f4f7fb;
+  border: 1px solid var(--bs23-line);
+  border-radius: 8px;
+  color: #111827;
+  margin-bottom: 4px;
+  padding: 10px 12px;
+}
+
 .bs23-settings-panel footer,
 .bs23-field-settings footer {
   border-top: 1px solid rgba(15, 23, 42, 0.08);
@@ -1690,22 +1699,23 @@ body.bs23-forms_page_bs23-form-builder-entries .update-nag {
 
 .bs23-admin-shell {
   background: var(--bs23-ui-bg);
-  padding: 0 24px 34px;
+  padding: 0 16px 34px;
 }
 
 .bs23-forms-hero {
   background: var(--bs23-ui-primary-dark);
   border-bottom: 1px solid var(--bs23-ui-border);
-  margin: 0 -24px;
+  margin: 0 -16px;
   min-height: auto;
-  padding: 40px 24px;
+  padding: 40px 16px;
 }
 
 .bs23-forms-hero__inner,
 .bs23-forms-dashboard {
-  margin-left: auto;
-  margin-right: auto;
-  max-width: 1280px;
+  margin-left: 0;
+  margin-right: 0;
+  max-width: none;
+  width: 100%;
 }
 
 .bs23-forms-hero__mark {
